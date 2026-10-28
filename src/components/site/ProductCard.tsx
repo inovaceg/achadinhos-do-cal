@@ -31,14 +31,14 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="relative aspect-square overflow-hidden bg-muted">
-        <Link to="/produto/$slug" params={{ slug: product.slug }} aria-label={product.name}>
+        <Link to="/produto/$slug" params={{ slug: product.slug }} aria-label={product.name} className="block h-full w-full">
           {product.main_image ? (
             <img
               src={product.main_image}
               alt={product.name}
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              className="h-full w-full object-contain object-center"
             />
           ) : (
             <div className="grid h-full place-items-center text-muted-foreground"><ImageOff className="h-8 w-8" /></div>
