@@ -41,7 +41,7 @@ function DefaultHero() {
   return (
     <div className="relative flex h-full items-center overflow-hidden bg-gradient-dark">
       <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-primary/40 blur-3xl" />
-      <div className="relative grid w-full items-center gap-6 px-6 md:grid-cols-[1fr_auto] md:px-12">
+      <div className="relative grid w-full items-center gap-6 px-6 py-6 md:grid-cols-[1fr_auto] md:px-12 md:py-0">
         <div className="space-y-3 text-secondary-foreground">
           <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary-glow">
             Curadoria diária
@@ -56,7 +56,7 @@ function DefaultHero() {
             Ver todas as ofertas
           </a>
         </div>
-        <img src="/assets/achadinhos-do-cal-3d-transparent.png" alt="Logo Achadinhos do Cal" className="hidden h-56 w-56 drop-shadow-2xl md:block" />
+        <img src="/assets/achadinhos-do-cal-3d-transparent.png" alt="Logo Achadinhos do Cal" className="mx-auto h-32 w-32 object-contain drop-shadow-2xl sm:h-40 sm:w-40 md:h-56 md:w-56" />
       </div>
     </div>
   );
@@ -72,7 +72,7 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
   }, [n]);
 
   return (
-    <section aria-label="Destaques" className="relative h-[260px] overflow-hidden rounded-3xl shadow-card md:h-[380px]">
+    <section aria-label="Destaques" className={`relative overflow-hidden rounded-3xl shadow-card ${n === 0 ? "h-auto min-h-[260px] md:h-[380px]" : "h-[260px] md:h-[380px]"}`}>
       {n === 0 ? (
         <DefaultHero />
       ) : (
