@@ -15,11 +15,11 @@ export function Logo({ size = 48, showText = true }: { size?: number; showText?:
         style={{ width: size, height: size }}
       />
       {showText && (
-        <span className="hidden min-w-0 flex-col leading-tight sm:flex">
-          <span className="truncate font-display text-lg font-extrabold tracking-tight">
+        <span className="flex min-w-0 flex-col leading-tight">
+          <span className="truncate font-display text-sm font-extrabold tracking-tight sm:text-lg">
             {s?.site_name ?? "Achadinhos do Cal"}
           </span>
-          <span className="truncate text-xs font-medium text-muted-foreground">
+          <span className="text-[10px] font-medium text-muted-foreground sm:truncate sm:text-xs">
             {s?.slogan ?? "Achou, gostou, economizou!"}
           </span>
         </span>
