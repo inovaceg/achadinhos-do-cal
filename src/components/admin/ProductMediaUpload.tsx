@@ -42,7 +42,7 @@ export function ProductMediaUpload({ form, disabled, onUploading }: { form: UseF
             else form.setValue("images", [...(form.getValues("images") ?? []), url], { shouldDirty: true, shouldValidate: true });
           } else {
             videoSlots -= 1;
-            form.setValue("videos", [...(form.getValues("videos") ?? []), url], { shouldDirty: true, shouldValidate: true });
+            form.setValue("videos", [...(form.getValues("videos") ?? []), url], { shouldDirty: true });
           }
         } catch { failed = true; }
       }
@@ -82,7 +82,8 @@ export function ProductMediaUpload({ form, disabled, onUploading }: { form: UseF
       {clips.map((url, i) => <MediaTile key={`${url}-${i}`} url={url} video disabled={disabled} label={`vídeo ${i + 1}`} onRemove={() => remove("video", i)} />)}
     </div>
     {message && <p role="status" className="text-sm text-destructive">{message}</p>}
-    {form.formState.errors.main_image?.message && <p role="alert" className="text-sm text-destructive">{form.formState.errors.main_image.message}</p>}
+    {!primary && clips.length > 0 && <p className="text-sm text-muted-foreground">Adicione uma foto principal para salvar o produto.</p>}
+    {form.formState.submitCount > 0 && form.formState.errors.main_image?.message && <p role="alert" className="text-sm text-destructive">{form.formState.errors.main_image.message}</p>}
     {form.formState.errors.images?.message && <p role="alert" className="text-sm text-destructive">{form.formState.errors.images.message}</p>}
     {form.formState.errors.videos?.message && <p role="alert" className="text-sm text-destructive">{form.formState.errors.videos.message}</p>}
   </div>;

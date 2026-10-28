@@ -5,6 +5,11 @@ describe("product media validation", () => {
   it("accepts up to nine extra photos and five HTTP(S) video URLs", () => {
     expect(productFormSchema.safeParse({ ...valid, images: Array.from({ length: 9 }, (_, i) => `https://example.com/${i}.jpg`), videos: Array.from({ length: 5 }, (_, i) => `https://example.com/${i}.mp4`) }).success).toBe(true);
   });
+  it("requires a primary photo with a Portuguese validation message", () => {
+    const result = productFormSchema.safeParse({ ...valid, main_image: "" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error.issues.find(issue => issue.path[0] === "main_image")?.message).toBe("Adicione uma foto principal para salvar o produto.");
+  });
   it("rejects excess media, unsafe URLs, and duplicates across media kinds", () => {
     expect(productFormSchema.safeParse({ ...valid, images: Array.from({ length: 10 }, (_, i) => `https://example.com/${i}.jpg`) }).success).toBe(false);
     expect(productFormSchema.safeParse({ ...valid, videos: Array.from({ length: 6 }, (_, i) => `https://example.com/${i}.mp4`) }).success).toBe(false);

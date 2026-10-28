@@ -3,7 +3,7 @@ import { z } from "zod";
 const uuid = z.string().uuid();
 const safeText = (max: number) => z.string().trim().max(max);
 const slugSchema = z.string().trim().min(1).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-export const imageSchema = z.string().trim().min(1).max(2000).refine((value) => {
+export const imageSchema = z.string().trim().min(1, "Adicione uma foto principal para salvar o produto.").max(2000).refine((value) => {
   if (value.startsWith("/")) return value.startsWith("/media/") && !value.startsWith("//");
   try { const url = new URL(value); return url.protocol === "http:" || url.protocol === "https:"; } catch { return false; }
 }, "Use uma imagem HTTP(S) ou um caminho /media/.");
