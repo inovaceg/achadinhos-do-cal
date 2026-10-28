@@ -55,7 +55,7 @@ function DefaultHero() {
                 className="relative grid w-full items-center gap-6 px-6 py-6 md:grid-cols-[1fr_auto] md:px-12 md:py-0">
                 <div className="space-y-3 text-secondary-foreground">
                     <span
-                        className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary-glow">CURADORIA DIÁRIA</span>
+                        className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary-glow">ACHADINHOS DO DIA!</span>
                     <h1
                         className="font-display text-3xl font-extrabold leading-tight md:text-5xl">Achou, gostou, <span className="text-primary">economizou!</span>
                     </h1>
