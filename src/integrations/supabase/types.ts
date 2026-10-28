@@ -14,16 +14,389 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      banners: {
+        Row: {
+          active: boolean
+          button_text: string | null
+          button_url: string | null
+          click_count: number
+          created_at: string
+          ends_at: string | null
+          id: string
+          image_desktop: string | null
+          image_mobile: string | null
+          sort_order: number
+          starts_at: string | null
+          subtitle: string | null
+          title: string | null
+        }
+        Insert: {
+          active?: boolean
+          button_text?: string | null
+          button_url?: string | null
+          click_count?: number
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          image_desktop?: string | null
+          image_mobile?: string | null
+          sort_order?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          title?: string | null
+        }
+        Update: {
+          active?: boolean
+          button_text?: string | null
+          button_url?: string | null
+          click_count?: number
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          image_desktop?: string | null
+          image_mobile?: string | null
+          sort_order?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      click_events: {
+        Row: {
+          banner_id: string | null
+          created_at: string
+          id: number
+          product_id: string | null
+          visitor_hash: string
+        }
+        Insert: {
+          banner_id?: string | null
+          created_at?: string
+          id?: never
+          product_id?: string | null
+          visitor_hash: string
+        }
+        Update: {
+          banner_id?: string | null
+          created_at?: string
+          id?: never
+          product_id?: string | null
+          visitor_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "click_events_banner_id_fkey"
+            columns: ["banner_id"]
+            isOneToOne: false
+            referencedRelation: "banners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "click_events_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_images: {
+        Row: {
+          id: string
+          product_id: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_views: {
+        Row: {
+          created_at: string
+          id: number
+          product_id: string
+          visitor_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          product_id: string
+          visitor_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          product_id?: string
+          visitor_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_views_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean
+          affiliate_url: string
+          badge: string | null
+          best_seller: boolean
+          category_id: string | null
+          click_count: number
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          featured: boolean
+          features: string[]
+          id: string
+          main_image: string | null
+          name: string
+          original_price: number | null
+          price_updated_at: string
+          promo_price: number | null
+          recommended: boolean
+          slug: string
+          store: string
+          tags: string[]
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          active?: boolean
+          affiliate_url: string
+          badge?: string | null
+          best_seller?: boolean
+          category_id?: string | null
+          click_count?: number
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          featured?: boolean
+          features?: string[]
+          id?: string
+          main_image?: string | null
+          name: string
+          original_price?: number | null
+          price_updated_at?: string
+          promo_price?: number | null
+          recommended?: boolean
+          slug: string
+          store?: string
+          tags?: string[]
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          active?: boolean
+          affiliate_url?: string
+          badge?: string | null
+          best_seller?: boolean
+          category_id?: string | null
+          click_count?: number
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          featured?: boolean
+          features?: string[]
+          id?: string
+          main_image?: string | null
+          name?: string
+          original_price?: number | null
+          price_updated_at?: string
+          promo_price?: number | null
+          recommended?: boolean
+          slug?: string
+          store?: string
+          tags?: string[]
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_settings: {
+        Row: {
+          affiliate_notice: string | null
+          contact_email: string | null
+          favicon_url: string | null
+          footer_text: string | null
+          id: number
+          instagram: string | null
+          logo_url: string | null
+          primary_color: string
+          seo_description: string | null
+          seo_title: string | null
+          share_image_url: string | null
+          site_name: string
+          slogan: string
+          tiktok: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          affiliate_notice?: string | null
+          contact_email?: string | null
+          favicon_url?: string | null
+          footer_text?: string | null
+          id?: number
+          instagram?: string | null
+          logo_url?: string | null
+          primary_color?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          share_image_url?: string | null
+          site_name?: string
+          slogan?: string
+          tiktok?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          affiliate_notice?: string | null
+          contact_email?: string | null
+          favicon_url?: string | null
+          footer_text?: string | null
+          id?: number
+          instagram?: string | null
+          logo_url?: string | null
+          primary_color?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          share_image_url?: string | null
+          site_name?: string
+          slogan?: string
+          tiktok?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      stores: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      register_click: {
+        Args: { _banner_id: string; _product_id: string; _visitor: string }
+        Returns: undefined
+      }
+      register_view: {
+        Args: { _product_id: string; _visitor: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +523,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
