@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Instagram, Mail, MessageCircle, Music2 } from "lucide-react";
 import { settingsQuery } from "@/lib/queries";
+import { FooterInstagram } from "./FooterInstagram";
 import { Logo } from "./Logo";
 
 function waLink(n: string) {
@@ -15,6 +16,7 @@ export function SiteFooter() {
   const { data: s } = useQuery(settingsQuery);
   return (
     <footer className="mt-16 bg-secondary text-secondary-foreground">
+      <FooterInstagram />
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]">
         <div className="space-y-4">
           <div className="[&_span]:text-secondary-foreground"><Logo size={56} /></div>
