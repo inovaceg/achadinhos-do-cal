@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import logoSmall from "@/assets/logo-small.webp.asset.json";
 import { settingsQuery } from "@/lib/queries";
 
 export function Logo({ size = 48, showText = true }: { size?: number; showText?: boolean }) {
@@ -8,7 +7,7 @@ export function Logo({ size = 48, showText = true }: { size?: number; showText?:
   return (
     <Link to="/" className="flex min-w-0 items-center gap-2.5" aria-label="Página inicial">
       <img
-        src={s?.logo_url || logoSmall.url}
+        src="/assets/achadinhos-do-cal-3d-transparent.png"
         alt={s?.site_name ?? "Achadinhos do Cal"}
         width={size}
         height={size}
