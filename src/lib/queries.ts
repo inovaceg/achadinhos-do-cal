@@ -60,7 +60,8 @@ export const bannersQuery = queryOptions({
   },
 });
 
-function liveFilter<T extends { eq: (c: string, v: unknown) => T; or: (f: string) => T }>(q: T) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function liveFilter(q: any): any {
   return q.eq("active", true).or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 }
 
