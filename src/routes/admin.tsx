@@ -119,7 +119,7 @@ function AdminPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+    <main className="mx-auto max-w-7xl space-y-8 px-4 py-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-extrabold">Administração</h1>

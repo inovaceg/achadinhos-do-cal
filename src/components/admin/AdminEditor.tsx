@@ -77,11 +77,11 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
-      <section className="space-y-6">
-        <div className="rounded-2xl border bg-card p-5">
+    <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <section className="min-w-0 space-y-6">
+        <div className="rounded-2xl border bg-card p-5 sm:p-6">
           <h2 className="mb-4 text-xl font-bold">{editing ? "Editar produto" : "Cadastrar produto"}</h2>
-          <form className="space-y-3" onSubmit={productForm.handleSubmit((value) => saveProduct.mutate(value))}>
+          <form className="space-y-4" onSubmit={productForm.handleSubmit((value) => saveProduct.mutate(value))}>
             <Field label="Nome" error={productForm.formState.errors.name?.message}><Input {...productForm.register("name")} /></Field>
             <Field label="Categoria" error={productForm.formState.errors.category_id?.message}>
               <select className="h-10 w-full rounded-md border bg-background px-3" {...productForm.register("category_id")}>
@@ -105,8 +105,8 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
               {productForm.watch("main_image") && <img src={productForm.watch("main_image")} alt="Prévia da foto do produto" className="mt-2 h-32 w-32 rounded-lg border object-cover" onError={() => setUploadError("Não foi possível carregar a prévia da imagem.")} />}
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Preço de venda (R$)" error={productForm.formState.errors.promo_price?.message}><Input type="number" min="0.01" step="0.01" {...productForm.register("promo_price", { valueAsNumber: true })} /></Field>
-              <Field label="Preço original (opcional)" error={productForm.formState.errors.original_price?.message}><Input type="number" min="0.01" step="0.01" {...productForm.register("original_price", { setValueAs: (value) => value === "" ? undefined : Number(value) })} /></Field>
+              <Field className="min-w-0" label="Preço de venda (R$)" error={productForm.formState.errors.promo_price?.message}><Input type="number" min="0.01" step="0.01" {...productForm.register("promo_price", { valueAsNumber: true })} /></Field>
+              <Field className="min-w-0" label="Preço original (opcional)" error={productForm.formState.errors.original_price?.message}><Input type="number" min="0.01" step="0.01" {...productForm.register("original_price", { setValueAs: (value) => value === "" ? undefined : Number(value) })} /></Field>
             </div>
             <Field label="Link de afiliado (HTTP/HTTPS)" error={productForm.formState.errors.affiliate_url?.message}><Input type="url" placeholder="https://…" {...productForm.register("affiliate_url")} /></Field>
             <Field label="Loja"><Input {...productForm.register("store")} /></Field>
@@ -114,13 +114,13 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
             <ToggleField label="Produto ativo" checked={productForm.watch("active")} onChange={(value) => productForm.setValue("active", value)} />
             <ToggleField label="Destacar oferta" checked={productForm.watch("featured")} onChange={(value) => productForm.setValue("featured", value)} />
             {saveProduct.error && <p role="alert" className="text-sm text-destructive">{saveProduct.error.message}</p>}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button disabled={saveProduct.isPending || uploading || !!uploadError}>{uploading ? "Enviando imagem…" : saveProduct.isPending ? "Salvando…" : "Salvar produto"}</Button>
               {editing && <Button type="button" variant="outline" disabled={saveProduct.isPending} onClick={resetProduct}>Cancelar</Button>}
             </div>
           </form>
         </div>
-        <div className="rounded-2xl border bg-card p-5">
+        <div className="rounded-2xl border bg-card p-5 sm:p-6">
           <h2 className="mb-4 text-xl font-bold">Categorias</h2>
           <form className="space-y-3" onSubmit={categoryForm.handleSubmit((value) => saveCategory.mutate(value))}>
             <Field label="Nome" error={categoryForm.formState.errors.name?.message}><Input {...categoryForm.register("name")} /></Field>
@@ -146,13 +146,13 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
           {removeCategory.error && <p role="alert" className="text-sm text-destructive">{removeCategory.error.message}</p>}
         </div>
       </section>
-      <section className="rounded-2xl border bg-card p-5">
+      <section className="min-w-0 self-start rounded-2xl border bg-card p-5">
         <h2 className="mb-4 text-xl font-bold">Produtos cadastrados ({data.products.length})</h2>
         {!data.products.length ? <p className="text-sm text-muted-foreground">Nenhum produto cadastrado.</p> : (
           <div className="space-y-3">
             {data.products.map((product) => (
               <article key={product.id} className="flex gap-3 rounded-xl border p-3">
-                <img src={product.main_image ?? ""} alt="" className="h-16 w-16 rounded-lg object-cover" />
+                <img src={product.main_image ?? ""} alt="" className="h-16 w-16 shrink-0 rounded-lg object-contain" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{product.name}</p>
                   <p className="text-sm text-muted-foreground">R$ {Number(product.promo_price).toFixed(2)} · {product.active ? "Ativo" : "Inativo"}</p>
@@ -171,8 +171,8 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
   );
 }
 
-function Field({ label, error, children }: { label: string; error?: string | undefined; children: React.ReactNode }) {
-  return <label className="block space-y-1 text-sm font-medium">{label}{children}{error && <span role="alert" className="block text-xs text-destructive">{error}</span>}</label>;
+function Field({ label, error, children, className }: { label: string; error?: string | undefined; children: React.ReactNode; className?: string }) {
+  return <label className={`block space-y-1 text-sm font-medium ${className ?? ""}`}>{label}{children}{error && <span role="alert" className="block text-xs text-destructive">{error}</span>}</label>;
 }
 function ToggleField({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
   return <div className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"><span>{label}</span><Switch checked={checked} onCheckedChange={onChange} /></div>;
