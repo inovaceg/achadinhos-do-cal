@@ -17,7 +17,7 @@ export function OfferButton({ product, className }: { product: Product; classNam
         className,
       )}
     >
-      Ver oferta <ExternalLink className="h-4 w-4" />
+      Comprar agora <ExternalLink className="h-4 w-4" />
     </a>
   );
 }

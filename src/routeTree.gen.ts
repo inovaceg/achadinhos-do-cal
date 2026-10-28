@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SiteRouteImport } from './routes/_site'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SiteIndexRouteImport } from './routes/_site/index'
 import { Route as SiteFavoritosRouteImport } from './routes/_site/favoritos'
@@ -22,6 +23,11 @@ import { Route as SiteProdutoSlugRouteImport } from './routes/_site/produto.$slu
 
 const SiteRoute = SiteRouteImport.update({
   id: '/_site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -72,6 +78,7 @@ const SiteProdutoSlugRoute = SiteProdutoSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
+  '/admin': typeof AdminRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/favoritos': typeof SiteFavoritosRoute
   '/ofertas': typeof SiteOfertasRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/produto/$slug': typeof SiteProdutoSlugRoute
 }
 export interface FileRoutesByTo {
+  '/admin': typeof AdminRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/favoritos': typeof SiteFavoritosRoute
   '/ofertas': typeof SiteOfertasRoute
@@ -95,6 +103,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
+  '/admin': typeof AdminRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_site/favoritos': typeof SiteFavoritosRoute
   '/_site/ofertas': typeof SiteOfertasRoute
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/sitemap.xml'
     | '/favoritos'
     | '/ofertas'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/produto/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/admin'
     | '/sitemap.xml'
     | '/favoritos'
     | '/ofertas'
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_site'
+    | '/admin'
     | '/sitemap.xml'
     | '/_site/favoritos'
     | '/_site/ofertas'
@@ -144,6 +156,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   SiteRoute: typeof SiteRouteWithChildren
+  AdminRoute: typeof AdminRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   MediaSplatRoute: typeof MediaSplatRoute
 }
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -247,6 +267,7 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRouteWithChildren,
+  AdminRoute: AdminRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   MediaSplatRoute: MediaSplatRoute,
 }

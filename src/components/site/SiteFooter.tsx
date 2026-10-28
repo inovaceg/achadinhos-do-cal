@@ -44,6 +44,7 @@ export function SiteFooter() {
             <li><Link to="/favoritos" className="hover:text-primary">Favoritos</Link></li>
             <li><Link to="/privacidade" className="hover:text-primary">Política de privacidade</Link></li>
             <li><Link to="/termos" className="hover:text-primary">Termos de uso</Link></li>
+            <li><Link to="/admin" className="opacity-60 hover:text-primary">Administração</Link></li>
           </ul>
         </div>
         <div className="space-y-3 text-sm">
