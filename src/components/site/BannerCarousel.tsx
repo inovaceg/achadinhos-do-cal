@@ -56,7 +56,7 @@ function DefaultHero() {
             Ver todas as ofertas
           </a>
         </div>
-        <img src="/assets/achadinhos-do-cal-3d.png" alt="Logo Achadinhos do Cal" className="hidden h-56 w-56 drop-shadow-2xl md:block" />
+        <img src="/assets/achadinhos-do-cal-3d-transparent.png" alt="Logo Achadinhos do Cal" className="hidden h-56 w-56 drop-shadow-2xl md:block" />
       </div>
     </div>
   );
