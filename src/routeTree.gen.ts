@@ -9,50 +9,246 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as SiteRouteImport } from './routes/_site'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SiteIndexRouteImport } from './routes/_site/index'
+import { Route as SiteFavoritosRouteImport } from './routes/_site/favoritos'
+import { Route as SiteOfertasRouteImport } from './routes/_site/ofertas'
+import { Route as SitePrivacidadeRouteImport } from './routes/_site/privacidade'
+import { Route as SiteTermosRouteImport } from './routes/_site/termos'
+import { Route as MediaSplatRouteImport } from './routes/media.$'
+import { Route as SiteCategoriaSlugRouteImport } from './routes/_site/categoria.$slug'
+import { Route as SiteProdutoSlugRouteImport } from './routes/_site/produto.$slug'
 
-const IndexRoute = IndexRouteImport.update({
+const SiteRoute = SiteRouteImport.update({
+  id: '/_site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteFavoritosRoute = SiteFavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteOfertasRoute = SiteOfertasRouteImport.update({
+  id: '/ofertas',
+  path: '/ofertas',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SitePrivacidadeRoute = SitePrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteTermosRoute = SiteTermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => SiteRoute,
+} as any)
+const MediaSplatRoute = MediaSplatRouteImport.update({
+  id: '/media/$',
+  path: '/media/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SiteCategoriaSlugRoute = SiteCategoriaSlugRouteImport.update({
+  id: '/categoria/$slug',
+  path: '/categoria/$slug',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteProdutoSlugRoute = SiteProdutoSlugRouteImport.update({
+  id: '/produto/$slug',
+  path: '/produto/$slug',
+  getParentRoute: () => SiteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof SiteIndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/favoritos': typeof SiteFavoritosRoute
+  '/ofertas': typeof SiteOfertasRoute
+  '/privacidade': typeof SitePrivacidadeRoute
+  '/termos': typeof SiteTermosRoute
+  '/media/$': typeof MediaSplatRoute
+  '/categoria/$slug': typeof SiteCategoriaSlugRoute
+  '/produto/$slug': typeof SiteProdutoSlugRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/favoritos': typeof SiteFavoritosRoute
+  '/ofertas': typeof SiteOfertasRoute
+  '/privacidade': typeof SitePrivacidadeRoute
+  '/termos': typeof SiteTermosRoute
+  '/media/$': typeof MediaSplatRoute
+  '/': typeof SiteIndexRoute
+  '/categoria/$slug': typeof SiteCategoriaSlugRoute
+  '/produto/$slug': typeof SiteProdutoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_site': typeof SiteRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_site/favoritos': typeof SiteFavoritosRoute
+  '/_site/ofertas': typeof SiteOfertasRoute
+  '/_site/privacidade': typeof SitePrivacidadeRoute
+  '/_site/termos': typeof SiteTermosRoute
+  '/media/$': typeof MediaSplatRoute
+  '/_site/': typeof SiteIndexRoute
+  '/_site/categoria/$slug': typeof SiteCategoriaSlugRoute
+  '/_site/produto/$slug': typeof SiteProdutoSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/sitemap.xml'
+    | '/favoritos'
+    | '/ofertas'
+    | '/privacidade'
+    | '/termos'
+    | '/media/$'
+    | '/categoria/$slug'
+    | '/produto/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/sitemap.xml'
+    | '/favoritos'
+    | '/ofertas'
+    | '/privacidade'
+    | '/termos'
+    | '/media/$'
+    | '/'
+    | '/categoria/$slug'
+    | '/produto/$slug'
+  id:
+    | '__root__'
+    | '/_site'
+    | '/sitemap.xml'
+    | '/_site/favoritos'
+    | '/_site/ofertas'
+    | '/_site/privacidade'
+    | '/_site/termos'
+    | '/media/$'
+    | '/_site/'
+    | '/_site/categoria/$slug'
+    | '/_site/produto/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  SiteRoute: typeof SiteRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  MediaSplatRoute: typeof MediaSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_site': {
+      id: '/_site'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_site/': {
+      id: '/_site/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof SiteIndexRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/favoritos': {
+      id: '/_site/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof SiteFavoritosRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/ofertas': {
+      id: '/_site/ofertas'
+      path: '/ofertas'
+      fullPath: '/ofertas'
+      preLoaderRoute: typeof SiteOfertasRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/privacidade': {
+      id: '/_site/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof SitePrivacidadeRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/termos': {
+      id: '/_site/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof SiteTermosRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/media/$': {
+      id: '/media/$'
+      path: '/media/$'
+      fullPath: '/media/$'
+      preLoaderRoute: typeof MediaSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_site/categoria/$slug': {
+      id: '/_site/categoria/$slug'
+      path: '/categoria/$slug'
+      fullPath: '/categoria/$slug'
+      preLoaderRoute: typeof SiteCategoriaSlugRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/produto/$slug': {
+      id: '/_site/produto/$slug'
+      path: '/produto/$slug'
+      fullPath: '/produto/$slug'
+      preLoaderRoute: typeof SiteProdutoSlugRouteImport
+      parentRoute: typeof SiteRoute
     }
   }
 }
 
+interface SiteRouteChildren {
+  SiteFavoritosRoute: typeof SiteFavoritosRoute
+  SiteOfertasRoute: typeof SiteOfertasRoute
+  SitePrivacidadeRoute: typeof SitePrivacidadeRoute
+  SiteTermosRoute: typeof SiteTermosRoute
+  SiteIndexRoute: typeof SiteIndexRoute
+  SiteCategoriaSlugRoute: typeof SiteCategoriaSlugRoute
+  SiteProdutoSlugRoute: typeof SiteProdutoSlugRoute
+}
+
+const SiteRouteChildren: SiteRouteChildren = {
+  SiteFavoritosRoute: SiteFavoritosRoute,
+  SiteOfertasRoute: SiteOfertasRoute,
+  SitePrivacidadeRoute: SitePrivacidadeRoute,
+  SiteTermosRoute: SiteTermosRoute,
+  SiteIndexRoute: SiteIndexRoute,
+  SiteCategoriaSlugRoute: SiteCategoriaSlugRoute,
+  SiteProdutoSlugRoute: SiteProdutoSlugRoute,
+}
+
+const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  SiteRoute: SiteRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  MediaSplatRoute: MediaSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
