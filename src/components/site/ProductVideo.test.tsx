@@ -3,6 +3,19 @@ import { describe, expect, it, vi } from "vitest";
 import { ProductVideo } from "./ProductVideo";
 
 describe("ProductVideo errors", () => {
+  it("autoplays silently while preserving the selected video URL and player options", () => {
+    const { container } = render(<ProductVideo src="https://example.test/video.mp4" poster="https://example.test/poster.jpg" label="Vídeo do produto" />);
+    const video = container.querySelector("video")!;
+
+    expect(video).toHaveAttribute("src", "https://example.test/video.mp4");
+    expect(video).toHaveAttribute("poster", "https://example.test/poster.jpg");
+    expect(video).toHaveAttribute("autoplay");
+    expect(video.muted).toBe(true);
+    expect(video).toHaveAttribute("playsinline");
+    expect(video).toHaveAttribute("controls");
+    expect(video).toHaveAttribute("preload", "metadata");
+  });
+
   it("shows a Portuguese error and retries by loading the player", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     const { container } = render(<ProductVideo src="https://example.test/video.mp4" poster="https://example.test/poster.jpg" label="Vídeo do produto" />);
