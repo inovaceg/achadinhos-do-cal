@@ -56,7 +56,6 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-sidebar-border">
         <div className="mx-auto max-w-7xl space-y-2 px-4 py-6 text-xs opacity-70">
-          {s?.affiliate_notice && <p><strong>Aviso de afiliados:</strong> {s.affiliate_notice}</p>}
           <p>
             Os preços exibidos são os registrados na última atualização e podem mudar sem aviso. A disponibilidade é
             responsabilidade de cada loja. As compras são realizadas em sites externos — o Achadinhos do Cal não
