@@ -18,7 +18,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
         <div className="space-y-4">
           <div className="[&_span]:text-secondary-foreground"><Logo size={56} /></div>
-          <p className="max-w-sm text-sm opacity-80">{s?.footer_text}</p>
+          <p className="max-w-sm text-sm opacity-80">Achadinhos para facilitar sua vida e cuidar do seu bolso.</p>
           <div className="flex gap-2">
             {s?.instagram && (
               <a href={social(s.instagram, "https://instagram.com/")} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="grid h-10 w-10 place-items-center rounded-full bg-sidebar-accent hover:bg-primary">
