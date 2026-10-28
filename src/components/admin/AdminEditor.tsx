@@ -60,6 +60,7 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
   }
   async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
     if (!imageTypes.includes(file.type) || file.size > 5 * 1024 * 1024) { setUploadError("Use imagem JPEG, PNG, WebP ou AVIF de até 5MB."); return; }
     const token = ++uploadToken.current;
@@ -88,11 +89,20 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
                 {data.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
               </select>
             </Field>
-            <Field label="Foto principal (URL ou envio)" error={uploadError || productForm.formState.errors.main_image?.message}>
-              <Input disabled={uploading} placeholder="https://… ou /media/…" {...productForm.register("main_image")} onChange={(event) => { productForm.setValue("main_image", event.target.value, { shouldValidate: true }); setUploadError(""); }} />
-              <input aria-label="Enviar imagem" disabled={uploading} className="block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={handleUpload} />
+            <Field label="Foto do produto" error={uploadError || productForm.formState.errors.main_image?.message}>
+              <input type="hidden" {...productForm.register("main_image")} />
+              <input
+                aria-label="Escolher foto do produto"
+                aria-describedby="product-photo-help"
+                disabled={uploading || saveProduct.isPending}
+                className="block w-full cursor-pointer rounded-md border bg-background text-sm file:mr-3 file:cursor-pointer file:border-0 file:bg-primary file:px-4 file:py-2 file:font-medium file:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/avif"
+                onChange={handleUpload}
+              />
+              <p id="product-photo-help" className="text-xs text-muted-foreground">{productForm.watch("main_image") ? "Trocar foto" : "Escolher foto"} · JPEG, PNG, WebP ou AVIF · até 5MB</p>
               {uploading && <p role="status">Enviando imagem…</p>}
-              {productForm.watch("main_image") && <img src={productForm.watch("main_image")} alt="Prévia da foto principal" className="mt-2 h-32 w-32 rounded-lg border object-cover" onError={() => setUploadError("Não foi possível carregar a prévia da imagem.")} />}
+              {productForm.watch("main_image") && <img src={productForm.watch("main_image")} alt="Prévia da foto do produto" className="mt-2 h-32 w-32 rounded-lg border object-cover" onError={() => setUploadError("Não foi possível carregar a prévia da imagem.")} />}
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Preço de venda (R$)" error={productForm.formState.errors.promo_price?.message}><Input type="number" min="0.01" step="0.01" {...productForm.register("promo_price", { valueAsNumber: true })} /></Field>
