@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Banner } from "@/lib/queries";
 import { trackClick } from "@/lib/visitor";
-import logo from "@/assets/logo-small.webp.asset.json";
 
 export function BannerSlide({ b, onClick }: { b: Banner; onClick?: () => void }) {
   const external = b.button_url && /^https?:\/\//.test(b.button_url);
@@ -57,7 +56,7 @@ function DefaultHero() {
             Ver todas as ofertas
           </a>
         </div>
-        <img src={logo.url} alt="" className="hidden h-56 w-56 drop-shadow-2xl md:block" />
+        <img src="/assets/achadinhos-do-cal-3d.png" alt="Logo Achadinhos do Cal" className="hidden h-56 w-56 drop-shadow-2xl md:block" />
       </div>
     </div>
   );
