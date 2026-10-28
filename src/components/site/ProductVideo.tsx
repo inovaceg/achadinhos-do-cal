@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 function errorMessage(code: number) {
   if (code === 2) return "Não foi possível carregar o vídeo. Verifique sua conexão e tente novamente.";
@@ -9,6 +9,13 @@ function errorMessage(code: number) {
 
 export function ProductVideo({ src, poster, label }: { src: string; poster?: string | null; label: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const setVideoRef = useCallback((video: HTMLVideoElement | null) => {
+    videoRef.current = video;
+    if (video) {
+      video.volume = 1;
+      video.muted = false;
+    }
+  }, []);
   const [message, setMessage] = useState<string | null>(null);
   function handleError(event: React.SyntheticEvent<HTMLVideoElement>) {
     const error = event.currentTarget.error;
@@ -21,7 +28,7 @@ export function ProductVideo({ src, poster, label }: { src: string; poster?: str
     videoRef.current?.load();
   }
   return <div className="relative h-full w-full">
-    <video key={src} ref={videoRef} src={src} poster={poster ?? undefined} autoPlay muted controls playsInline preload="metadata" aria-label={label} onError={handleError} className="h-full w-full object-contain" />
+    <video key={src} ref={setVideoRef} src={src} poster={poster ?? undefined} autoPlay controls playsInline preload="metadata" aria-label={label} onError={handleError} className="h-full w-full object-contain" />
     {message && <div role="alert" className="absolute inset-x-2 bottom-2 z-30 max-h-full overflow-y-auto rounded-lg bg-card p-2 text-sm shadow-card">{message}<div className="mt-1 flex gap-3"><button type="button" onClick={retry} className="inline-flex min-h-11 items-center underline">Tentar novamente</button><a href={src} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center underline">Abrir vídeo original</a></div></div>}
   </div>;
 }

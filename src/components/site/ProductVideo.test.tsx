@@ -3,14 +3,15 @@ import { describe, expect, it, vi } from "vitest";
 import { ProductVideo } from "./ProductVideo";
 
 describe("ProductVideo errors", () => {
-  it("autoplays silently while preserving the selected video URL and player options", () => {
+  it("autoplays with sound at full volume while preserving the selected video URL and player options", () => {
     const { container } = render(<ProductVideo src="https://example.test/video.mp4" poster="https://example.test/poster.jpg" label="Vídeo do produto" />);
     const video = container.querySelector("video")!;
 
     expect(video).toHaveAttribute("src", "https://example.test/video.mp4");
     expect(video).toHaveAttribute("poster", "https://example.test/poster.jpg");
     expect(video).toHaveAttribute("autoplay");
-    expect(video.muted).toBe(true);
+    expect(video.muted).toBe(false);
+    expect(video.volume).toBe(1);
     expect(video).toHaveAttribute("playsinline");
     expect(video).toHaveAttribute("controls");
     expect(video).toHaveAttribute("preload", "metadata");
