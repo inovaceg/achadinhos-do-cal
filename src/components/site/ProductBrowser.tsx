@@ -75,13 +75,13 @@ export function parseSearch(s: Record<string, unknown>): SearchParams {
   const num = (v: unknown) => (v === undefined || v === "" || Number.isNaN(Number(v)) ? undefined : Number(v));
   const ordens = ["menor-preco", "maior-desconto", "recentes", "mais-clicados"];
   return {
-    q: typeof s.q === "string" && s.q ? s.q.slice(0, 100) : undefined,
-    categoria: typeof s.categoria === "string" && s.categoria ? s.categoria : undefined,
-    loja: typeof s.loja === "string" && s.loja ? s.loja : undefined,
-    min: num(s.min),
-    max: num(s.max),
-    desconto: s.desconto === true || s.desconto === "true" ? true : undefined,
-    recentes: s.recentes === true || s.recentes === "true" ? true : undefined,
-    ordem: ordens.includes(s.ordem as string) ? (s.ordem as SearchParams["ordem"]) : undefined,
+    q: typeof s["q"] === "string" && s["q"] ? s["q"].slice(0, 100) : undefined,
+    categoria: typeof s["categoria"] === "string" && s["categoria"] ? s["categoria"] : undefined,
+    loja: typeof s["loja"] === "string" && s["loja"] ? s["loja"] : undefined,
+    min: num(s["min"]),
+    max: num(s["max"]),
+    desconto: s["desconto"] === true || s["desconto"] === "true" ? true : undefined,
+    recentes: s["recentes"] === true || s["recentes"] === "true" ? true : undefined,
+    ordem: ordens.includes(s["ordem"] as string) ? (s["ordem"] as SearchParams["ordem"]) : undefined,
   };
 }

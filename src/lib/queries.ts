@@ -99,14 +99,14 @@ export const homeSectionQuery = (section: HomeSection) =>
   });
 
 export type SearchParams = {
-  q?: string;
-  categoria?: string;
-  loja?: string;
-  min?: number;
-  max?: number;
-  desconto?: boolean;
-  recentes?: boolean;
-  ordem?: "menor-preco" | "maior-desconto" | "recentes" | "mais-clicados";
+  q?: string | undefined;
+  categoria?: string | undefined;
+  loja?: string | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
+  desconto?: boolean | undefined;
+  recentes?: boolean | undefined;
+  ordem?: "menor-preco" | "maior-desconto" | "recentes" | "mais-clicados" | undefined;
 };
 
 export const searchProductsQuery = (p: SearchParams) =>
