@@ -35,7 +35,7 @@ export function ProductBrowser({
           )}
           <select aria-label="Loja" className={sel} value={params.loja ?? ""} onChange={(e) => set({ loja: e.target.value || undefined })}>
             <option value="">Todas as lojas</option>
-            {stores.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+            {stores.map((s) => <option key={s.id} value={s.name ?? ""}>{s.name ?? ""}</option>)}
           </select>
           <input aria-label="Preço mínimo" type="number" min={0} placeholder="R$ mín" className={`${sel} w-24`} value={params.min ?? ""} onChange={(e) => set({ min: e.target.value ? Number(e.target.value) : undefined })} />
           <input aria-label="Preço máximo" type="number" min={0} placeholder="R$ máx" className={`${sel} w-24`} value={params.max ?? ""} onChange={(e) => set({ max: e.target.value ? Number(e.target.value) : undefined })} />

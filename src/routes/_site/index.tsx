@@ -74,13 +74,9 @@ function Home() {
                 params={{ slug: c.slug }}
                 className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 text-center shadow-card transition hover:-translate-y-0.5 hover:border-primary"
               >
-                {c.image_url ? (
-                  <img src={c.image_url} alt="" loading="lazy" className="h-12 w-12 rounded-xl object-cover" />
-                ) : (
-                  <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
-                    <CategoryIcon name={c.icon} className="h-6 w-6" />
-                  </span>
-                )}
+                <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+                  <CategoryIcon name={c.icon} className="h-6 w-6" />
+                </span>
                 <span className="text-xs font-semibold sm:text-sm">{c.name}</span>
               </Link>
             ))}

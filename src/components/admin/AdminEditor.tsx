@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
 type AdminData = { products: Product[]; categories: Category[] };
-const imageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const imageTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
 export function AdminEditor({ data, userId }: { data: AdminData; userId: string }) {
   const queryClient = useQueryClient();
@@ -61,7 +61,7 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
   async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (!imageTypes.includes(file.type) || file.size > 5 * 1024 * 1024) { setUploadError("Use imagem JPEG, PNG, WebP ou GIF de até 5MB."); return; }
+    if (!imageTypes.includes(file.type) || file.size > 5 * 1024 * 1024) { setUploadError("Use imagem JPEG, PNG, WebP ou AVIF de até 5MB."); return; }
     const token = ++uploadToken.current;
     setUploading(true);
     setUploadError("");
@@ -90,7 +90,7 @@ export function AdminEditor({ data, userId }: { data: AdminData; userId: string 
             </Field>
             <Field label="Foto principal (URL ou envio)" error={uploadError || productForm.formState.errors.main_image?.message}>
               <Input disabled={uploading} placeholder="https://… ou /media/…" {...productForm.register("main_image")} onChange={(event) => { productForm.setValue("main_image", event.target.value, { shouldValidate: true }); setUploadError(""); }} />
-              <input aria-label="Enviar imagem" disabled={uploading} className="block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleUpload} />
+              <input aria-label="Enviar imagem" disabled={uploading} className="block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={handleUpload} />
               {uploading && <p role="status">Enviando imagem…</p>}
               {productForm.watch("main_image") && <img src={productForm.watch("main_image")} alt="Prévia da foto principal" className="mt-2 h-32 w-32 rounded-lg border object-cover" onError={() => setUploadError("Não foi possível carregar a prévia da imagem.")} />}
             </Field>

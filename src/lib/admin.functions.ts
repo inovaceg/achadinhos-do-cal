@@ -4,12 +4,13 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import { categoryInput, productInput } from "@/lib/admin.schemas";
+import { mapCategory, mapProduct, PRODUCT_SELECT } from "@/lib/queries";
 
 const uuid = z.string().uuid();
 type AdminClient = SupabaseClient<Database>;
 
-async function assertAdmin(client: AdminClient, userId: string) {
-  const { data, error } = await client.rpc("has_role", { _user_id: userId, _role: "admin" });
+async function assertAdmin(client: AdminClient) {
+  const { data, error } = await client.rpc("is_admin");
   if (error || data !== true) throw new Error("Acesso negado: esta conta não tem permissão de administrador.");
 }
 function makeSlug(value: string) {
@@ -29,40 +30,43 @@ async function uniqueSlug(client: AdminClient, table: "products" | "categories",
 }
 
 export const getAdminData = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  await assertAdmin(context.supabase, context.userId);
+  await assertAdmin(context.supabase);
   const [products, categories] = await Promise.all([
-    context.supabase.from("products").select("*").order("created_at", { ascending: false }),
+    context.supabase.from("products").select(PRODUCT_SELECT).order("created_at", { ascending: false }),
     context.supabase.from("categories").select("*").order("sort_order"),
   ]);
   if (products.error) throw products.error;
   if (categories.error) throw categories.error;
-  return { products: products.data, categories: categories.data };
+  return { products: products.data.map((row) => mapProduct(row)), categories: categories.data.map(mapCategory) };
 });
 
 export const saveAdminCategory = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((d: unknown) => categoryInput.parse(d)).handler(async ({ data, context }) => {
-  await assertAdmin(context.supabase, context.userId);
+  await assertAdmin(context.supabase);
   const slug = data.slug ?? await uniqueSlug(context.supabase, "categories", data.name, data.id);
-  const values = { name: data.name, slug, description: data.description || null, active: data.active };
+  const values = { name: data.name, slug, description: data.description || "", active: data.active };
   const result = data.id ? await context.supabase.from("categories").update(values).eq("id", data.id).select().single() : await context.supabase.from("categories").insert(values).select().single();
   if (result.error) throw result.error;
   return result.data;
 });
 export const deleteAdminCategory = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((d: unknown) => z.object({ id: uuid }).parse(d)).handler(async ({ data, context }) => {
-  await assertAdmin(context.supabase, context.userId);
+  await assertAdmin(context.supabase);
   const { error } = await context.supabase.from("categories").delete().eq("id", data.id);
   if (error) throw error;
   return true;
 });
 export const saveAdminProduct = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((d: unknown) => productInput.parse(d)).handler(async ({ data, context }) => {
-  await assertAdmin(context.supabase, context.userId);
+  await assertAdmin(context.supabase);
   const slug = data.slug ?? await uniqueSlug(context.supabase, "products", data.name, data.id);
-  const values = { name: data.name, slug, category_id: data.category_id, main_image: data.main_image, promo_price: data.promo_price, affiliate_url: data.affiliate_url, description: data.description || null, store: data.store || "Outra", original_price: data.original_price ?? null, active: data.active, featured: data.featured };
+  const storeName = data.store || "Outra";
+  const { data: store, error: storeError } = await context.supabase.from("stores").upsert({ name: storeName }, { onConflict: "name" }).select("id").single();
+  if (storeError) throw storeError;
+  const values = { name: data.name, slug, category_id: data.category_id, image_url: data.main_image, price: data.promo_price, external_url: data.affiliate_url, description: data.description || "", store_id: store.id, original_price: data.original_price ?? null, active: data.active, featured: data.featured };
   const result = data.id ? await context.supabase.from("products").update(values).eq("id", data.id).select().single() : await context.supabase.from("products").insert(values).select().single();
   if (result.error) throw result.error;
   return result.data;
 });
 export const deleteAdminProduct = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((d: unknown) => z.object({ id: uuid }).parse(d)).handler(async ({ data, context }) => {
-  await assertAdmin(context.supabase, context.userId);
+  await assertAdmin(context.supabase);
   const { error } = await context.supabase.from("products").delete().eq("id", data.id);
   if (error) throw error;
   return true;
@@ -105,11 +109,8 @@ export const fetchLinkMetadata = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { url: string }) => z.object({ url: z.string().url().max(2000) }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Acesso negado");
+    const { data: isAdmin, error } = await context.supabase.rpc("is_admin");
+    if (error || !isAdmin) throw new Error("Acesso negado");
     const url = new URL(data.url);
     if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("URL inválida");
     const result: {

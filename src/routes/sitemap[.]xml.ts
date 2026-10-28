@@ -8,7 +8,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const origin = new URL(request.url).origin;
         const sb = publicClient();
         const [{ data: products }, { data: cats }] = await Promise.all([
-          sb.from("products").select("slug, updated_at").eq("active", true).limit(5000),
+          sb.from("products").select("slug, created_at").eq("active", true).limit(5000),
           sb.from("categories").select("slug").eq("active", true),
         ]);
         const urls = [
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           `<url><loc>${origin}/ofertas</loc></url>`,
           ...(cats ?? []).map((c) => `<url><loc>${origin}/categoria/${c.slug}</loc></url>`),
           ...(products ?? []).map(
-            (p) => `<url><loc>${origin}/produto/${p.slug}</loc><lastmod>${p.updated_at}</lastmod></url>`,
+            (p) => `<url><loc>${origin}/produto/${p.slug}</loc><lastmod>${p.created_at}</lastmod></url>`,
           ),
         ];
         return new Response(
