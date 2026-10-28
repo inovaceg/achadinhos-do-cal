@@ -60,7 +60,7 @@ export const saveAdminProduct = createServerFn({ method: "POST" }).middleware([r
   const storeName = data.store || "Outra";
   const { data: store, error: storeError } = await context.supabase.from("stores").upsert({ name: storeName }, { onConflict: "name" }).select("id").single();
   if (storeError) throw storeError;
-  const values = { name: data.name, slug, category_id: data.category_id, image_url: data.main_image, price: data.promo_price, external_url: data.affiliate_url, description: data.description || "", store_id: store.id, original_price: data.original_price ?? null, active: data.active, featured: data.featured };
+  const values = { name: data.name, slug, category_id: data.category_id, image_url: data.main_image, images: data.images, videos: data.videos, price: data.promo_price, external_url: data.affiliate_url, description: data.description || "", store_id: store.id, original_price: data.original_price ?? null, active: data.active, featured: data.featured };
   const result = data.id ? await context.supabase.from("products").update(values).eq("id", data.id).select().single() : await context.supabase.from("products").insert(values).select().single();
   if (result.error) throw result.error;
   return result.data;

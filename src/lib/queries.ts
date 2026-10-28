@@ -20,7 +20,7 @@ export function mapBanner(row: RawBanner): Banner {
   return { ...row, subtitle: row.subtitle ?? "", image_url: image, mobile_image_url: mobileImage, button_text: row.button_text ?? "", button_url: row.button_url ?? "", active: row.active ?? false, sort_order: row.sort_order ?? 0, image_desktop: image, image_mobile: mobileImage };
 }
 export function mapProduct(row: RawProduct, popularity: Map<string, { clicks: number; views: number }> = new Map()): Product {
-  return { ...row, description: row.description ?? "", features: row.features ?? [], images: row.images ?? [], tags: row.tags ?? [], created_at: row.created_at ?? "", price_updated_at: row.price_updated_at ?? "", active: row.active ?? false, featured: row.featured ?? false, bestseller: row.bestseller ?? false, recommended: row.recommended ?? false, image_url: row.image_url ?? "", promo_price: Number(row.price), affiliate_url: row.external_url ?? "", main_image: row.image_url, best_seller: row.bestseller ?? false, badge: null, store: row.stores?.name ?? "", click_count: popularity.get(row.id)?.clicks ?? 0, view_count: popularity.get(row.id)?.views ?? 0, categories: row.categories ? { name: row.categories.name ?? "", slug: row.categories.slug ?? "" } : null };
+  return { ...row, description: row.description ?? "", features: row.features ?? [], images: row.images ?? [], videos: row.videos ?? [], tags: row.tags ?? [], created_at: row.created_at ?? "", price_updated_at: row.price_updated_at ?? "", active: row.active ?? false, featured: row.featured ?? false, bestseller: row.bestseller ?? false, recommended: row.recommended ?? false, image_url: row.image_url ?? "", promo_price: Number(row.price), affiliate_url: row.external_url ?? "", main_image: row.image_url, best_seller: row.bestseller ?? false, badge: null, store: row.stores?.name ?? "", click_count: popularity.get(row.id)?.clicks ?? 0, view_count: popularity.get(row.id)?.views ?? 0, categories: row.categories ? { name: row.categories.name ?? "", slug: row.categories.slug ?? "" } : null };
 }
 export const settingsQuery = queryOptions({ queryKey: ["settings"], queryFn: async () => {
   const { data, error } = await supabase.from("site_settings").select("data").eq("id", 1).maybeSingle();
@@ -57,9 +57,29 @@ export const homeSectionQuery = (section: HomeSection) => queryOptions({ queryKe
   const { data, error } = await query.order("created_at", { ascending: false }).limit(10); if (error) throw error;
   return (data ?? []).map(row => mapProduct(row));
 } });
-export type SearchParams = { q?: string | undefined; categoria?: string | undefined; loja?: string | undefined; min?: number | undefined; max?: number | undefined; desconto?: boolean | undefined; recentes?: boolean | undefined; ordem?: "menor-preco" | "maior-desconto" | "recentes" | "mais-clicados" | undefined };
+export type SearchParams = { q?: string | undefined; categoria?: string | undefined; loja?: string | undefined; colecao?: string | undefined; min?: number | undefined; max?: number | undefined; desconto?: boolean | undefined; recentes?: boolean | undefined; ordem?: "menor-preco" | "maior-desconto" | "recentes" | "mais-clicados" | undefined };
 export const searchProductsQuery = (p: SearchParams) => queryOptions({ queryKey: ["products", "search", p], queryFn: async () => {
+  if (p.ordem === "maior-desconto") {
+    const { data: ranked, error: rankError } = await supabase.rpc("discount_product_ids", {
+      p_category_slug: p.categoria ?? null, p_store_name: p.loja ?? null, p_collection: p.colecao ?? null,
+      p_query: p.q ?? null, p_min: p.min ?? null, p_max: p.max ?? null, p_recent: !!p.recentes,
+    });
+    if (rankError) throw rankError;
+    const ids = ranked?.map((row) => row.product_id) ?? [];
+    if (!ids.length) return [];
+    const { data, error } = await liveProducts().in("id", ids);
+    if (error) throw error;
+    const byId = new Map((data ?? []).map((row) => [row.id, mapProduct(row)]));
+    return ids.flatMap((id) => { const product = byId.get(id); return product ? [product] : []; });
+  }
   let query = liveProducts();
+  if (p.colecao) {
+    const { data: links, error } = await supabase.from("video_collection_products").select("product_id, video_collections!inner(active)").eq("collection_id", p.colecao).eq("video_collections.active", true);
+    if (error) throw error;
+    const ids = links?.map((link) => link.product_id) ?? [];
+    if (!ids.length) return [];
+    query = query.in("id", ids);
+  }
   if (p.min != null) query = query.gte("price", p.min);
   if (p.max != null) query = query.lte("price", p.max);
   if (p.categoria) {
@@ -82,7 +102,6 @@ export const searchProductsQuery = (p: SearchParams) => queryOptions({ queryKey:
   const discount = (x: Product) => x.original_price && x.promo_price < x.original_price ? (x.original_price - x.promo_price) / x.original_price : 0;
   if (p.desconto) rows = rows.filter(x => discount(x) > 0);
   if (p.ordem === "mais-clicados") rows.sort((a, b) => b.click_count - a.click_count);
-  if (p.ordem === "maior-desconto") rows.sort((a, b) => discount(b) - discount(a));
   return rows;
 } });
 export const productsByIdsQuery = (ids: string[]) => queryOptions({ queryKey: ["products", "ids", ids], queryFn: async () => {

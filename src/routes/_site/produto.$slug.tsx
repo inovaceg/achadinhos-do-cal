@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Heart, Info, Share2, Store, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { getProductPage } from "@/lib/public.functions";
@@ -9,6 +9,7 @@ import { absoluteUrl } from "@/lib/media";
 import { relatedQuery, type Product } from "@/lib/queries";
 import { trackView, useFavorites } from "@/lib/visitor";
 import { OfferButton, ProductGrid } from "@/components/site/ProductCard";
+import { ProductMediaGallery } from "@/components/site/ProductMediaGallery";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_site/produto/$slug")({
@@ -61,14 +62,11 @@ export const Route = createFileRoute("/_site/produto/$slug")({
 
 function ProductPage() {
   const { product: p, images, origin } = Route.useLoaderData();
-  const gallery = [p.main_image, ...images.map((i) => i.url)].filter(Boolean) as string[];
-  const [active, setActive] = useState(0);
   const { isFav, toggle } = useFavorites();
   const discount = calcDiscount(p.original_price, p.promo_price);
   const { data: related = [] } = useQuery(relatedQuery(p.category_id, p.id));
 
   useEffect(() => {
-    setActive(0);
     trackView(p.id);
   }, [p.id]);
 
@@ -92,20 +90,7 @@ function ProductPage() {
         )}
       </nav>
       <div className="grid gap-8 md:grid-cols-2">
-        <div className="space-y-3">
-          <div className="aspect-square overflow-hidden rounded-3xl border border-border bg-card">
-            {gallery[active] && <img src={gallery[active]} alt={p.name} className="h-full w-full object-contain" />}
-          </div>
-          {gallery.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto">
-              {gallery.map((g, i) => (
-                <button key={g + i} onClick={() => setActive(i)} className={cn("h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-card", i === active ? "border-primary" : "border-border")}>
-                  <img src={g} alt="" loading="lazy" className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductMediaGallery productId={p.id} name={p.name} primary={p.main_image} images={images.map((item) => item.url)} videos={p.videos ?? []} />
         <div className="space-y-5">
           <div className="flex flex-wrap gap-2 text-xs font-semibold">
             <span className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-accent-foreground"><Store className="h-3.5 w-3.5" /> {p.store}</span>

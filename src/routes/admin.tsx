@@ -5,6 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { getAdminData } from "@/lib/admin.functions";
 import { AdminEditor } from "@/components/admin/AdminEditor";
+import { SiteContentAdmin } from "@/components/admin/SiteContentAdmin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -133,7 +134,7 @@ function AdminPage() {
           <p>{dataQuery.error.message.includes("Acesso negado") ? "Esta conta não possui permissão de administrador. Solicite acesso ao responsável pelo projeto." : "Não foi possível carregar os dados administrativos. Tente novamente."}</p>
           <Button className="mt-3" variant="outline" onClick={() => dataQuery.refetch()}>Tentar novamente</Button>
         </section>
-      ) : <AdminEditor key={session.user.id} data={dataQuery.data} userId={session.user.id} />}
+      ) : <><AdminEditor key={session.user.id} data={dataQuery.data} userId={session.user.id} /><SiteContentAdmin key={session.user.id} userId={session.user.id} categories={dataQuery.data.categories} products={dataQuery.data.products} /></>}
     </main>
   );
 }

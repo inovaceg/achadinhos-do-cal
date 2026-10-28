@@ -17,12 +17,21 @@ const externalUrl = z.string().trim().url().max(2000).refine((value) => {
 }, "Use um link HTTP ou HTTPS.");
 const price = z.coerce.number().finite().positive().max(9999999999.99).refine((value) => Math.abs(value * 100 - Math.round(value * 100)) <= Number.EPSILON * Math.max(1, Math.abs(value * 100)), "Informe no máximo duas casas decimais.");
 export const categoryInput = z.object({ id: uuid.optional(), name: safeText(120).min(1), slug: slugSchema.optional(), description: safeText(2000).optional(), active: z.boolean() });
-export const productInput = z.object({
+export const videoSchema = externalUrl;
+const productBase = z.object({
   id: uuid.optional(), name: safeText(200).min(1), slug: slugSchema.optional(), category_id: uuid,
-  main_image: imageSchema, promo_price: price, affiliate_url: externalUrl, description: safeText(10000).optional(),
+  main_image: imageSchema, images: z.array(imageSchema).max(9).default([]), videos: z.array(videoSchema).max(5).default([]),
+  promo_price: price, affiliate_url: externalUrl, description: safeText(10000).optional(),
   store: safeText(120).optional(), original_price: price.nullable().optional(), active: z.boolean(), featured: z.boolean(),
 });
-export const productFormSchema = productInput.omit({ id: true, slug: true }).extend({ category_id: uuid });
+const refineProduct = (data: z.infer<typeof productBase>, ctx: z.RefinementCtx) => {
+  if (data.images.includes(data.main_image)) ctx.addIssue({ code: "custom", path: ["images"], message: "A foto principal não pode estar repetida." });
+  if (data.videos.some(url => data.images.includes(url) || url === data.main_image)) ctx.addIssue({ code: "custom", path: ["videos"], message: "Uma mídia não pode estar repetida." });
+  if (new Set(data.images).size !== data.images.length || new Set(data.videos).size !== data.videos.length) ctx.addIssue({ code: "custom", path: ["images"], message: "Remova mídias duplicadas." });
+};
+export const productInput = productBase.superRefine(refineProduct);
+export const productFormSchema = productBase.omit({ id: true, slug: true }).superRefine(refineProduct);
 export const categoryFormSchema = categoryInput.omit({ id: true, slug: true });
-export type ProductForm = z.infer<typeof productFormSchema>;
+export type ProductForm = z.input<typeof productFormSchema>;
+export type ProductFormOutput = z.output<typeof productFormSchema>;
 export type CategoryForm = z.infer<typeof categoryFormSchema>;

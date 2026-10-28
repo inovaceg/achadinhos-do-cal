@@ -13,11 +13,11 @@ export function OfferButton({ product, className }: { product: Product; classNam
       rel="noopener noreferrer nofollow sponsored"
       onClick={() => trackClick({ productId: product.id })}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-primary px-4 py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground shadow-glow transition hover:brightness-105 active:scale-[0.98]",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-primary px-4 py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground shadow-glow transition hover:brightness-105 active:scale-[0.98]",
         className,
       )}
     >
-      Comprar agora <ExternalLink className="h-4 w-4" />
+      VER OFERTA <ExternalLink className="h-4 w-4" />
     </a>
   );
 }
@@ -29,8 +29,8 @@ export function ProductCard({ product }: { product: Product }) {
   const badge = product.badge || (product.best_seller ? "Mais vendido" : product.recommended ? "Recomendado" : null);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="relative aspect-square overflow-hidden bg-muted">
+    <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="relative aspect-square overflow-hidden bg-white">
         <Link to="/produto/$slug" params={{ slug: product.slug }} aria-label={product.name} className="block h-full w-full">
           {product.main_image ? (
             <img
@@ -38,7 +38,7 @@ export function ProductCard({ product }: { product: Product }) {
               alt={product.name}
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-contain object-center"
+              className="h-full w-full object-contain object-center p-3 sm:p-4"
             />
           ) : (
             <div className="grid h-full place-items-center text-muted-foreground"><ImageOff className="h-8 w-8" /></div>
@@ -57,14 +57,14 @@ export function ProductCard({ product }: { product: Product }) {
           onClick={() => toggle(product.id)}
           aria-label={fav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
           aria-pressed={fav}
-          className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-card/90 shadow-card backdrop-blur transition hover:scale-110"
+          className="absolute right-2 top-2 grid h-11 w-11 place-items-center rounded-full bg-card/90 shadow-card backdrop-blur transition hover:scale-110"
         >
           <Heart className={cn("h-4 w-4", fav ? "fill-primary text-primary" : "text-foreground")} />
         </button>
       </div>
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">Loja: {product.store}</span>
-        <Link to="/produto/$slug" params={{ slug: product.slug }} className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug hover:text-primary">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3">
+        {product.store && <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-primary">{product.store}</span>}
+        <Link to="/produto/$slug" params={{ slug: product.slug }} className="line-clamp-2 min-h-[2.75rem] text-sm font-semibold leading-snug hover:text-primary">
           {product.name}
         </Link>
         <div className="mt-auto pt-1">
@@ -72,13 +72,13 @@ export function ProductCard({ product }: { product: Product }) {
             <p className="text-xs text-muted-foreground line-through">De: {formatBRL(product.original_price)}</p>
           )}
           {product.promo_price != null && (
-            <p className="font-display text-lg font-extrabold leading-tight">
+            <p className="font-display text-xl font-extrabold leading-tight md:text-2xl">
               <span className="text-xs font-semibold text-muted-foreground">Por: </span>
               {formatBRL(product.promo_price)}
             </p>
           )}
         </div>
-        <OfferButton product={product} className="mt-2 w-full py-2.5 text-xs sm:text-sm" />
+        <OfferButton product={product} className="mt-2 w-full py-2.5 text-xs sm:text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
       </div>
     </article>
   );
@@ -86,7 +86,7 @@ export function ProductCard({ product }: { product: Product }) {
 
 export function ProductGrid({ products }: { products: Product[] }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid w-full min-w-0 grid-cols-[repeat(2,minmax(0,1fr))] gap-3 md:grid-cols-[repeat(3,minmax(0,1fr))] md:gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]">
       {products.map((p) => (
         <ProductCard key={p.id} product={p} />
       ))}
@@ -96,7 +96,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
 
 export function GridSkeleton({ n = 5 }: { n?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid w-full min-w-0 grid-cols-[repeat(2,minmax(0,1fr))] gap-3 md:grid-cols-[repeat(3,minmax(0,1fr))] md:gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]">
       {Array.from({ length: n }).map((_, i) => (
         <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card">
           <div className="aspect-square animate-pulse bg-muted" />

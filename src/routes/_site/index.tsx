@@ -5,7 +5,9 @@ import type { LucideIcon } from "lucide-react";
 import { BannerCarousel } from "@/components/site/BannerCarousel";
 import { ProductGrid, GridSkeleton } from "@/components/site/ProductCard";
 import { CategoryIcon } from "@/components/site/CategoryIcon";
+import { CategoryCount } from "@/components/site/CategoryCount";
 import { bannersQuery, categoriesQuery, homeSectionQuery, type HomeSection } from "@/lib/queries";
+import { HomePromotions } from "@/components/site/HomePromotions";
 
 export const Route = createFileRoute("/_site/")({
   head: () => ({
@@ -26,7 +28,7 @@ function Section({ id, title, icon: Icon, hideEmpty = true }: { id: HomeSection;
   if (!isLoading && hideEmpty && !data?.length) return null;
   return (
     <section className="space-y-4">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <h2 className="flex items-center gap-2 text-xl font-extrabold md:text-2xl">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-primary"><Icon className="h-5 w-5" /></span>
           {title}
@@ -48,6 +50,7 @@ function Home() {
   return (
     <div className="mx-auto max-w-7xl space-y-12 px-4 py-5 md:py-8">
       <BannerCarousel banners={banners} />
+      <HomePromotions />
 
       <Section id="deals" title="Ofertas imperdíveis" icon={Flame} />
       <Section id="recommended" title="Achadinhos do Cal recomenda" icon={ThumbsUp} />
@@ -66,18 +69,19 @@ function Home() {
       {cats.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-xl font-extrabold md:text-2xl">Ofertas por categoria</h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {cats.map((c) => (
               <Link
                 key={c.id}
                 to="/categoria/$slug"
                 params={{ slug: c.slug }}
-                className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 text-center shadow-card transition hover:-translate-y-0.5 hover:border-primary"
+                className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 text-center shadow-card focus-visible:outline-2 focus-visible:outline-primary transition hover:-translate-y-0.5 hover:border-primary"
               >
                 <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
                   <CategoryIcon name={c.icon} className="h-6 w-6" />
                 </span>
                 <span className="text-xs font-semibold sm:text-sm">{c.name}</span>
+                <CategoryCount id={c.id} />
               </Link>
             ))}
           </div>

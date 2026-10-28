@@ -15,7 +15,7 @@ describe("database row mappings", () => {
 
   it("normalizes nullable product fields without changing UI aliases", () => {
     const product: Tables<"products"> & { categories: { name: string; slug: string } | null; stores: { name: string | null } | null } = {
-      id: "p1", name: "Item", slug: "item", description: null, features: null, category_id: null, store_id: null, original_price: null, price: 12.5, external_url: "https://example.com", image_url: null, images: null, tags: null, active: null, featured: null, bestseller: null, recommended: null, created_at: null, price_updated_at: null, expires_at: null, categories: null, stores: null,
+      id: "p1", name: "Item", slug: "item", description: null, features: null, category_id: null, store_id: null, original_price: null, price: 12.5, external_url: "https://example.com", image_url: null, images: null, videos: [], tags: null, active: null, featured: null, bestseller: null, recommended: null, created_at: null, price_updated_at: null, expires_at: null, categories: null, stores: null,
     };
     expect(mapProduct(product)).toMatchObject({ description: "", features: [], images: [], tags: [], active: false, promo_price: 12.5, affiliate_url: "https://example.com", main_image: null, best_seller: false });
   });

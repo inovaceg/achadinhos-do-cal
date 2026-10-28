@@ -18,12 +18,17 @@ export function ProductBrowser({
   const { data: stores = [] } = useQuery(storesQuery);
   const [showFilters, setShowFilters] = useState(false);
   const set = (patch: Partial<SearchParams>) => onChange({ ...params, ...patch });
-  const sel = "h-10 rounded-xl border border-input bg-card px-3 text-sm";
+  const sel = "h-11 rounded-xl border border-input bg-card px-3 text-sm";
 
   return (
-    <div className="space-y-4">
+    <div className="w-full min-w-0 space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => setShowFilters((v) => !v)} className="flex h-10 items-center gap-2 rounded-xl border border-input bg-card px-3 text-sm font-semibold md:hidden">
+        {[30, 50, 100].map((amount) => {
+          const active = params.max === amount && params.min == null;
+          return <button key={amount} type="button" aria-pressed={active} className={`min-h-11 rounded-xl border px-3 text-sm font-semibold ${active ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card"}`} onClick={() => set(active ? { max: undefined } : { min: undefined, max: amount })}>Até R$ {amount}</button>;
+        })}
+        <button type="button" aria-pressed={params.ordem === "maior-desconto"} className={`min-h-11 rounded-xl border px-3 text-sm font-semibold ${params.ordem === "maior-desconto" ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card"}`} onClick={() => set({ ordem: params.ordem === "maior-desconto" ? undefined : "maior-desconto" })}>Maiores descontos</button>
+        <button onClick={() => setShowFilters((v) => !v)} className="flex h-11 items-center gap-2 rounded-xl border border-input bg-card px-3 text-sm font-semibold md:hidden">
           <SlidersHorizontal className="h-4 w-4" /> Filtros
         </button>
         <div className={`${showFilters ? "flex" : "hidden"} w-full flex-wrap gap-2 md:flex md:w-auto`}>
@@ -82,6 +87,7 @@ export function parseSearch(s: Record<string, unknown>): SearchParams {
     max: num(s["max"]),
     desconto: s["desconto"] === true || s["desconto"] === "true" ? true : undefined,
     recentes: s["recentes"] === true || s["recentes"] === "true" ? true : undefined,
+    colecao: typeof s["colecao"] === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s["colecao"]) ? s["colecao"] : undefined,
     ordem: ordens.includes(s["ordem"] as string) ? (s["ordem"] as SearchParams["ordem"]) : undefined,
   };
 }
