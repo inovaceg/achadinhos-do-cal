@@ -1,12 +1,16 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ProductVideo } from "./ProductVideo";
+
+beforeEach(() => {
+  vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+});
 
 describe("ProductVideo errors", () => {
   it("autoplays with sound at full volume while preserving the selected video URL and player options", () => {
     const { container } = render(<ProductVideo src="https://example.test/video.mp4" poster="https://example.test/poster.jpg" label="Vídeo do produto" />);
     const video = container.querySelector("video")!;
-
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalledWith();
     expect(video).toHaveAttribute("src", "https://example.test/video.mp4");
     expect(video).toHaveAttribute("poster", "https://example.test/poster.jpg");
     expect(video).toHaveAttribute("autoplay");
@@ -17,7 +21,19 @@ describe("ProductVideo errors", () => {
     expect(video).toHaveAttribute("preload", "metadata");
   });
 
-  it("shows a Portuguese error and retries by loading the player", () => {
+  it("shows a sound retry for NotAllowedError and clears it when playback starts", async () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play")
+      .mockRejectedValueOnce(new DOMException("blocked", "NotAllowedError"))
+      .mockResolvedValueOnce(undefined);
+    const { container } = render(<ProductVideo src="clip.mp4" label="Vídeo" />);
+    const button = await screen.findByRole("button", { name: "Reproduzir com som" });
+    fireEvent.click(button);
+    expect(play).toHaveBeenCalledTimes(2);
+    fireEvent.playing(container.querySelector("video")!);
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Reproduzir com som" })).not.toBeInTheDocument());
+  });
+
+  it("shows a Portuguese media error and retries by loading the player", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     const { container } = render(<ProductVideo src="https://example.test/video.mp4" poster="https://example.test/poster.jpg" label="Vídeo do produto" />);
     const video = container.querySelector("video")!;

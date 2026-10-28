@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ExternalLink, Heart, ImageOff } from "lucide-react";
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import { calcDiscount, formatBRL } from "@/lib/format";
 import { trackClick, useFavorites } from "@/lib/visitor";
 import type { Product } from "@/lib/queries";
@@ -23,7 +24,11 @@ export function ProductCard({ product }: { product: Product }) {
   const media = [...new Set([product.main_image, ...(product.images ?? [])].filter((url): url is string => !!url))].map(url => ({ url, video: false })).concat([...new Set(product.videos ?? [])].map(url => ({ url, video: true })));
   const [selected, setSelected] = useState(0);
   const active = media[selected];
-  const move = (direction: number) => setSelected(index => (index + direction + media.length) % media.length);
+  const selectMedia = (index: number) => {
+    if (media[index]?.video) flushSync(() => setSelected(index));
+    else setSelected(index);
+  };
+  const move = (direction: number) => selectMedia((selected + direction + media.length) % media.length);
 
   return (
     <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition hover:-translate-y-0.5 hover:shadow-lg">

@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ProductMediaGallery } from "./ProductMediaGallery";
+
+beforeEach(() => vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined));
 
 describe("ProductMediaGallery video thumbnail", () => {
   it("shows a visual thumbnail with a primary-image fallback and selects the playable video", () => {
@@ -19,6 +21,7 @@ describe("ProductMediaGallery video thumbnail", () => {
     fireEvent.click(screen.getByRole("button", { name: "Vídeo 2 de 2" }));
     const player = container.querySelector('.aspect-square video')!;
     expect(player).toHaveAttribute("autoplay");
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalledOnce();
     expect(player).toHaveAttribute("controls");
     expect(player).toHaveAttribute("src", "https://example.test/video.mp4");
     expect(screen.getByRole("button", { name: "Vídeo 2 de 2" })).toHaveAttribute("aria-pressed", "true");
