@@ -5,9 +5,14 @@ import { ProductMediaGallery } from "./ProductMediaGallery";
 beforeEach(() => vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined));
 
 describe("ProductMediaGallery video thumbnail", () => {
-  it("shows a visual thumbnail with a primary-image fallback and selects the playable video", () => {
+  it("constrains the gallery and thumbnail strip while showing video thumbnails", () => {
     const { container } = render(<ProductMediaGallery productId="p1" name="Produto" primary="https://example.test/cover.jpg" images={[]} videos={["https://example.test/video.mp4"]} />);
 
+    const gallery = container.firstElementChild;
+    expect(gallery).toHaveClass("w-full", "min-w-0", "max-w-full");
+    const mainMedia = container.querySelector(".aspect-square");
+    expect(mainMedia).toHaveClass("w-full", "md:max-w-none");
+    expect(container.querySelector(".overflow-x-auto")).toHaveClass("min-w-0", "max-w-full");
     expect(screen.queryByText("▶ Vídeo")).not.toBeInTheDocument();
     expect(container.querySelector('button[aria-label="Vídeo 2 de 2"] img')).toHaveAttribute("src", "https://example.test/cover.jpg");
     const thumbnailVideo = container.querySelector<HTMLVideoElement>('button[aria-label="Vídeo 2 de 2"] video')!;

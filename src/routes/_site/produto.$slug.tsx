@@ -82,23 +82,23 @@ function ProductPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-12 px-4 py-6">
-      <nav className="text-sm text-muted-foreground">
+    <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6 px-4 py-6 md:space-y-12">
+      <nav className="min-w-0 text-sm text-muted-foreground">
         <Link to="/" className="hover:text-primary">Início</Link>
         {p.categories && (
           <> / <Link to="/categoria/$slug" params={{ slug: p.categories.slug }} className="hover:text-primary">{p.categories.name}</Link></>
         )}
       </nav>
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
         <ProductMediaGallery productId={p.id} name={p.name} primary={p.main_image} images={images.map((item) => item.url)} videos={p.videos ?? []} />
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           <div className="flex flex-wrap gap-2 text-xs font-semibold">
             <span className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-accent-foreground"><Store className="h-3.5 w-3.5" /> {p.store}</span>
             {p.categories && <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1"><Tag className="h-3.5 w-3.5" /> {p.categories.name}</span>}
             {p.best_seller && <span className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground">Mais vendido</span>}
           </div>
-          <h1 className="text-2xl font-extrabold leading-tight md:text-3xl">{p.name}</h1>
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+          <h1 className="break-words text-2xl font-extrabold leading-tight md:text-3xl">{p.name}</h1>
+          <div className="min-w-0 rounded-2xl border border-border bg-card p-5 shadow-card">
             {p.original_price != null && discount != null && (
               <p className="text-sm text-muted-foreground">De: <span className="line-through">{formatBRL(p.original_price)}</span></p>
             )}
@@ -108,19 +108,19 @@ function ProductPage() {
             </div>
             <p className="mt-1 text-xs text-muted-foreground">Preço registrado em {new Date(p.price_updated_at).toLocaleDateString("pt-BR")}</p>
             <OfferButton product={p} className="mt-4 w-full py-4 text-base" />
-            <div className="mt-3 grid grid-cols-3 gap-2">
+            <div className="mt-3 grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-3">
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="col-span-1 flex items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-sm font-semibold hover:bg-accent"
+                className="col-span-1 flex min-w-0 flex-wrap items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-sm font-semibold hover:bg-accent sm:col-span-1"
               >
                 WhatsApp
               </a>
-              <button onClick={share} className="flex items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-sm font-semibold hover:bg-accent">
+              <button onClick={share} className="flex min-w-0 flex-wrap items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-sm font-semibold hover:bg-accent">
                 <Share2 className="h-4 w-4" /> Compartilhar
               </button>
-              <button onClick={() => toggle(p.id)} className="flex items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-sm font-semibold hover:bg-accent">
+              <button onClick={() => toggle(p.id)} className="flex min-w-0 flex-wrap items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-sm font-semibold hover:bg-accent">
                 <Heart className={cn("h-4 w-4", isFav(p.id) && "fill-primary text-primary")} /> {isFav(p.id) ? "Salvo" : "Salvar"}
               </button>
             </div>
@@ -130,15 +130,15 @@ function ProductPage() {
             Preço e disponibilidade podem mudar na loja. A compra é concluída no site da {p.store}; o Achadinhos do Cal não processa pagamentos e pode receber comissão, sem custo extra para você.
           </p>
           {p.description && (
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2 break-words">
               <h2 className="text-lg font-bold">Descrição</h2>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+              <p className="whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">{p.description}</p>
             </div>
           )}
           {p.features.length > 0 && (
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2 break-words">
               <h2 className="text-lg font-bold">Características principais</h2>
-              <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+              <ul className="list-inside list-disc space-y-1 break-words text-sm text-muted-foreground">
                 {p.features.map((f) => <li key={f}>{f}</li>)}
               </ul>
             </div>
