@@ -22,10 +22,16 @@ export type Database = { __InternalSupabase: { PostgrestVersion: "14.18" }; publ
 }; Views: Record<string, never>; Functions: { admin_product_statistics: { Args: { p_start?: string | null; p_end?: string | null }; Returns: Json }; is_admin: { Args: Record<PropertyKey, never>; Returns: boolean }; product_popularity: { Args: Record<PropertyKey, never>; Returns: { product_id: string; clicks: number; views: number }[] }; discount_product_ids: { Args: { p_category_slug?: string | null; p_store_name: string | null; p_collection: string | null; p_query: string | null; p_min: number | null; p_max: number | null; p_recent: boolean }; Returns: { product_id: string }[] }; save_video_collection: { Args: { p_id: string | null; p_title: string; p_cover_url: string; p_video_url: string; p_active: boolean; p_sort_order: number; p_product_ids: string[] }; Returns: string }; record_event: { Args: { p_kind: string; p_visitor: string; p_product?: string | null; p_banner?: string | null }; Returns: undefined } }; Enums: Record<string, never>; CompositeTypes: Record<string, never> } };
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof DatabaseWithoutInternals, "public">];
-export type Tables<Name extends keyof DefaultSchema["Tables"]> = DefaultSchema["Tables"][Name]["Row"];
+
+export type Tables<Name extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"]), Schema extends keyof DatabaseWithoutInternals = "public"> = (DatabaseWithoutInternals[Schema]["Tables"] & DatabaseWithoutInternals[Schema]["Views"])[Name] extends { Row: infer R } ? R : never;
+export type TablesInsert<Name extends keyof DefaultSchema["Tables"]> = DefaultSchema["Tables"][Name] extends { Insert: infer I } ? I : never;
+export type TablesUpdate<Name extends keyof DefaultSchema["Tables"]> = DefaultSchema["Tables"][Name] extends { Update: infer U } ? U : never;
+export type Enums<Name extends keyof DefaultSchema["Enums"]> = DefaultSchema["Enums"][Name];
+export type CompositeTypes<Name extends keyof DefaultSchema["CompositeTypes"]> = DefaultSchema["CompositeTypes"][Name];
 export type ProductInsert = Database["public"]["Tables"]["products"]["Insert"];
 export type ProductUpdate = Database["public"]["Tables"]["products"]["Update"];
 export type ProductRaw = ProductRow;
 export type CategoryRaw = CategoryRow;
 export type BannerRaw = BannerRow;
+export const Constants = { public: { Enums: {} } } as const;
 export {};
