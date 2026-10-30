@@ -219,6 +219,7 @@ export type Database = {
           store: string
           tags: string[]
           updated_at: string
+          videos: string[]
           view_count: number
         }
         Insert: {
@@ -244,6 +245,7 @@ export type Database = {
           store?: string
           tags?: string[]
           updated_at?: string
+          videos?: string[]
           view_count?: number
         }
         Update: {
@@ -269,6 +271,7 @@ export type Database = {
           store?: string
           tags?: string[]
           updated_at?: string
+          videos?: string[]
           view_count?: number
         }
         Relationships: [
@@ -277,6 +280,54 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotional_banners: {
+        Row: {
+          active: boolean
+          category_id: string | null
+          collection_id: string | null
+          created_at: string
+          id: string
+          image_url: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          category_id?: string | null
+          collection_id?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string | null
+          collection_id?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotional_banners_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotional_banners_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "video_collections"
             referencedColumns: ["id"]
           },
         ]
@@ -374,6 +425,69 @@ export type Database = {
         }
         Relationships: []
       }
+      video_collection_products: {
+        Row: {
+          collection_id: string
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          collection_id: string
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          collection_id?: string
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_collection_products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "video_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_collection_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_collections: {
+        Row: {
+          active: boolean
+          cover_url: string
+          created_at: string
+          id: string
+          sort_order: number
+          title: string
+          video_url: string
+        }
+        Insert: {
+          active?: boolean
+          cover_url: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          title: string
+          video_url: string
+        }
+        Update: {
+          active?: boolean
+          cover_url?: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          title?: string
+          video_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -386,6 +500,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       register_click: {
         Args: { _banner_id: string; _product_id: string; _visitor: string }
         Returns: undefined
@@ -393,6 +508,18 @@ export type Database = {
       register_view: {
         Args: { _product_id: string; _visitor: string }
         Returns: undefined
+      }
+      save_video_collection: {
+        Args: {
+          p_active: boolean
+          p_cover_url: string
+          p_id: string
+          p_product_ids: string[]
+          p_sort_order: number
+          p_title: string
+          p_video_url: string
+        }
+        Returns: string
       }
     }
     Enums: {
