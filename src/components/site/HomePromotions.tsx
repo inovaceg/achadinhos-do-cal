@@ -23,10 +23,16 @@ export function HomePromotions() {
           ))}
         </section>
       )}
-      <nav aria-label="Encontre ofertas por preço" className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card p-4">
-        <span className="mr-2 flex items-center gap-2 text-sm font-bold"><SlidersHorizontal className="h-4 w-4 text-primary" />Escolha seu orçamento</span>
-        {[30, 50, 100].map((price) => <Link key={price} to="/ofertas" search={{ max: price }} className="inline-flex min-h-11 items-center rounded-full border border-primary/20 bg-primary/5 px-4 text-sm font-semibold hover:bg-primary hover:text-primary-foreground">Até R$ {price}</Link>)}
-        <Link to="/ofertas" search={{ ordem: "maior-desconto" }} className="inline-flex min-h-11 items-center rounded-full border border-primary/20 bg-primary/5 px-4 text-sm font-semibold hover:bg-primary hover:text-primary-foreground">Maiores descontos</Link>
+<nav aria-label="Encontre ofertas por preço" className="relative flex flex-col gap-4 overflow-hidden rounded-3xl bg-gradient-dark p-5 text-secondary-foreground md:flex-row md:items-center md:justify-between md:p-6">
+        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/40 blur-3xl" />
+        <div className="relative">
+          <span className="flex items-center gap-2 font-display text-lg font-bold"><SlidersHorizontal className="h-5 w-5 text-primary" />Escolha seu orçamento</span>
+          <p className="text-sm opacity-75">Achadinhos que cabem no seu bolso</p>
+        </div>
+        <div className="relative flex flex-wrap gap-2">
+          {[30, 50, 100].map((price) => <Link key={price} to="/ofertas" search={{ max: price }} className="inline-flex min-h-11 items-center rounded-full bg-card/10 px-4 text-sm font-semibold ring-1 ring-card/20 transition hover:bg-primary hover:text-primary-foreground">Até R$ {price}</Link>)}
+          <Link to="/ofertas" search={{ ordem: "maior-desconto" }} className="inline-flex min-h-11 items-center rounded-full bg-gradient-primary px-4 text-sm font-bold text-primary-foreground shadow-glow">Maiores descontos</Link>
+        </div>
       </nav>
       {collections.length > 0 && (
         <section className="space-y-4">
