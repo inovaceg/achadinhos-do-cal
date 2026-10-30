@@ -25,6 +25,8 @@ export type Database = {
           id: string
           image_desktop: string | null
           image_mobile: string | null
+          image_url: string | null
+          mobile_image_url: string | null
           sort_order: number
           starts_at: string | null
           subtitle: string | null
@@ -40,6 +42,8 @@ export type Database = {
           id?: string
           image_desktop?: string | null
           image_mobile?: string | null
+          image_url?: string | null
+          mobile_image_url?: string | null
           sort_order?: number
           starts_at?: string | null
           subtitle?: string | null
@@ -55,6 +59,8 @@ export type Database = {
           id?: string
           image_desktop?: string | null
           image_mobile?: string | null
+          image_url?: string | null
+          mobile_image_url?: string | null
           sort_order?: number
           starts_at?: string | null
           subtitle?: string | null
@@ -198,25 +204,31 @@ export type Database = {
       products: {
         Row: {
           active: boolean
-          affiliate_url: string
+          affiliate_url: string | null
           badge: string | null
           best_seller: boolean
+          bestseller: boolean
           category_id: string | null
           click_count: number
           created_at: string
           description: string | null
           expires_at: string | null
+          external_url: string | null
           featured: boolean
           features: string[]
           id: string
+          image_url: string | null
+          images: string[]
           main_image: string | null
           name: string
           original_price: number | null
+          price: number
           price_updated_at: string
           promo_price: number | null
           recommended: boolean
           slug: string
-          store: string
+          store: string | null
+          store_id: string | null
           tags: string[]
           updated_at: string
           videos: string[]
@@ -224,25 +236,31 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          affiliate_url: string
+          affiliate_url?: string | null
           badge?: string | null
           best_seller?: boolean
+          bestseller?: boolean
           category_id?: string | null
           click_count?: number
           created_at?: string
           description?: string | null
           expires_at?: string | null
+          external_url?: string | null
           featured?: boolean
           features?: string[]
           id?: string
+          image_url?: string | null
+          images?: string[]
           main_image?: string | null
           name: string
           original_price?: number | null
+          price?: number
           price_updated_at?: string
           promo_price?: number | null
           recommended?: boolean
           slug: string
-          store?: string
+          store?: string | null
+          store_id?: string | null
           tags?: string[]
           updated_at?: string
           videos?: string[]
@@ -250,25 +268,31 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          affiliate_url?: string
+          affiliate_url?: string | null
           badge?: string | null
           best_seller?: boolean
+          bestseller?: boolean
           category_id?: string | null
           click_count?: number
           created_at?: string
           description?: string | null
           expires_at?: string | null
+          external_url?: string | null
           featured?: boolean
           features?: string[]
           id?: string
+          image_url?: string | null
+          images?: string[]
           main_image?: string | null
           name?: string
           original_price?: number | null
+          price?: number
           price_updated_at?: string
           promo_price?: number | null
           recommended?: boolean
           slug?: string
-          store?: string
+          store?: string | null
+          store_id?: string | null
           tags?: string[]
           updated_at?: string
           videos?: string[]
@@ -280,6 +304,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
             referencedColumns: ["id"]
           },
         ]
@@ -493,6 +524,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      discount_product_ids: {
+        Args: {
+          p_category_slug?: string
+          p_collection?: string
+          p_max?: number
+          p_min?: number
+          p_query?: string
+          p_recent?: boolean
+          p_store_name?: string
+        }
+        Returns: {
+          product_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -501,6 +546,14 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      product_popularity: {
+        Args: never
+        Returns: {
+          clicks: number
+          product_id: string
+          views: number
+        }[]
+      }
       register_click: {
         Args: { _banner_id: string; _product_id: string; _visitor: string }
         Returns: undefined

@@ -15,6 +15,27 @@
       "when": 1793378625288,
       "tag": "0001_site_content",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793378682738,
+      "tag": "0002_align_products_banners",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793378713799,
+      "tag": "0003_product_popularity",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793378744114,
+      "tag": "0004_discount_product_ids",
+      "breakpoints": true
     }
   ]
 }

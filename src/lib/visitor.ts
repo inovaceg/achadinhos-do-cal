@@ -10,10 +10,10 @@ export function getVisitorId() {
   return id;
 }
 export function trackClick(opts: { productId?: string; bannerId?: string }) {
-  try { void supabase.rpc("record_event", { p_kind: opts.bannerId ? "banner" : "click", p_product: opts.productId ?? null, p_banner: opts.bannerId ?? null, p_visitor: getVisitorId() }).then(() => undefined, () => undefined); } catch { /* ignore */ }
+  try { void supabase.rpc("register_click", { _product_id: (opts.productId ?? null) as string, _banner_id: (opts.bannerId ?? null) as string, _visitor: getVisitorId() }).then(() => undefined, () => undefined); } catch { /* ignore */ }
 }
 export function trackView(productId: string) {
-  try { void supabase.rpc("record_event", { p_kind: "view", p_product: productId, p_visitor: getVisitorId() }).then(() => undefined, () => undefined); } catch { /* ignore */ }
+  try { void supabase.rpc("register_view", { _product_id: productId, _visitor: getVisitorId() }).then(() => undefined, () => undefined); } catch { /* ignore */ }
 }
 function readFavs(): string[] { try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; } }
 export function useFavorites() {
