@@ -8,6 +8,7 @@ import { CategoryIcon } from "@/components/site/CategoryIcon";
 import { CategoryCount } from "@/components/site/CategoryCount";
 import { bannersQuery, categoriesQuery, homeSectionQuery, type HomeSection } from "@/lib/queries";
 import { HomePromotions } from "@/components/site/HomePromotions";
+import { siteUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/_site/")({
   head: () => ({
@@ -17,8 +18,10 @@ export const Route = createFileRoute("/_site/")({
       { property: "og:title", content: "Achadinhos do Cal — Achou, gostou, economizou!" },
       { property: "og:description", content: "Achadinhos e promoções selecionados da Shopee, Mercado Livre, Amazon e Magalu." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: siteUrl("/") },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: siteUrl("/") }],
   }),
   component: Home,
 });

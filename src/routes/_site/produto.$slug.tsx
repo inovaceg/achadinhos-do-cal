@@ -5,7 +5,7 @@ import { Heart, Info, Share2, Store, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { getProductPage } from "@/lib/public.functions";
 import { calcDiscount, formatBRL } from "@/lib/format";
-import { absoluteUrl } from "@/lib/media";
+import { seoImageUrl, siteUrl } from "@/lib/seo";
 import { relatedQuery, type Product } from "@/lib/queries";
 import { trackView, useFavorites } from "@/lib/visitor";
 import { OfferButton, ProductGrid } from "@/components/site/ProductCard";
@@ -24,16 +24,17 @@ export const Route = createFileRoute("/_site/produto/$slug")({
     const price = p.promo_price != null ? ` por ${formatBRL(p.promo_price)}` : "";
     const title = `${p.name}${price} — Achadinhos do Cal`;
     const desc = (p.description || `Achadinho na ${p.store}${price}. Confira a oferta!`).slice(0, 160);
-    const img = absoluteUrl(p.main_image, loaderData.origin);
-    const url = `${loaderData.origin}/produto/${p.slug}`;
+    const img = seoImageUrl(p.main_image);
+    const url = siteUrl(`/produto/${encodeURIComponent(p.slug)}`);
     const ld = {
       "@context": "https://schema.org",
       "@type": "Product",
+      url,
       name: p.name,
       image: img ? [img] : undefined,
       description: p.description ?? undefined,
       brand: { "@type": "Brand", name: p.store },
-      offers: p.promo_price != null ? { "@type": "Offer", price: p.promo_price, priceCurrency: "BRL", url: p.affiliate_url } : undefined,
+      offers: p.promo_price != null ? { "@type": "Offer", price: p.promo_price, priceCurrency: "BRL", url } : undefined,
     };
     return {
       meta: [

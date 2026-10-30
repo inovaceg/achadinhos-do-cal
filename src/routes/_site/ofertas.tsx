@@ -2,19 +2,29 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductBrowser, parseSearch } from "@/components/site/ProductBrowser";
+import { siteUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/_site/ofertas")({
   validateSearch: parseSearch,
-  head: () => ({
-    meta: [
-      { title: "Todas as ofertas — Achadinhos do Cal" },
-      { name: "description", content: "Busque e filtre todos os achadinhos por loja, categoria, preço e desconto." },
-      { property: "og:title", content: "Todas as ofertas — Achadinhos do Cal" },
-      { property: "og:description", content: "Busque e filtre todos os achadinhos por loja, categoria, preço e desconto." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  loaderDeps: ({ search }) => ({ colecao: search.colecao }),
+  loader: ({ deps }) => ({ colecao: deps.colecao }),
+  head: ({ loaderData }) => {
+    const collectionId = loaderData?.colecao;
+    const validCollection = collectionId && /^[a-f\d]{8}-(?:[a-f\d]{4}-){3}[a-f\d]{12}$/i.test(collectionId) ? collectionId : null;
+    const canonical = siteUrl(validCollection ? `/ofertas?colecao=${encodeURIComponent(validCollection)}` : "/ofertas");
+    return {
+      meta: [
+        { title: "Todas as ofertas — Achadinhos do Cal" },
+        { name: "description", content: "Busque e filtre todos os achadinhos por loja, categoria, preço e desconto." },
+        { property: "og:title", content: "Todas as ofertas — Achadinhos do Cal" },
+        { property: "og:description", content: "Busque e filtre todos os achadinhos por loja, categoria, preço e desconto." },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: canonical },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+    };
+  },
   component: Ofertas,
 });
 

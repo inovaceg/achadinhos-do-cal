@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ProductBrowser, parseSearch } from "@/components/site/ProductBrowser";
 import { getCategoryMeta } from "@/lib/public.functions";
+import { siteUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/_site/categoria/$slug")({
   validateSearch: parseSearch,
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/_site/categoria/$slug")({
   },
   head: ({ loaderData }) => {
     const name = loaderData?.cat.name ?? "Categoria";
+    const canonical = siteUrl(`/categoria/${encodeURIComponent(loaderData?.cat.slug ?? "")}`);
     const desc = loaderData?.cat.description || `Os melhores achadinhos de ${name} selecionados pelo Achadinhos do Cal.`;
     return {
       meta: [
@@ -19,8 +21,10 @@ export const Route = createFileRoute("/_site/categoria/$slug")({
         { property: "og:title", content: `${name} — Achadinhos do Cal` },
         { property: "og:description", content: desc },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: canonical },
         { name: "twitter:card", content: "summary_large_image" },
       ],
+      links: [{ rel: "canonical", href: canonical }],
     };
   },
   notFoundComponent: () => <div className="mx-auto max-w-7xl px-4 py-20 text-center">Categoria não encontrada.</div>,

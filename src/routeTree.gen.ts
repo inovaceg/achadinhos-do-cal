@@ -18,6 +18,7 @@ import { Route as SiteOfertasRouteImport } from './routes/_site/ofertas'
 import { Route as SitePrivacidadeRouteImport } from './routes/_site/privacidade'
 import { Route as SiteTermosRouteImport } from './routes/_site/termos'
 import { Route as MediaSplatRouteImport } from './routes/media.$'
+import { Route as SeoImagemRouteImport } from './routes/seo.imagem'
 import { Route as SiteCategoriaSlugRouteImport } from './routes/_site/categoria.$slug'
 import { Route as SiteProdutoSlugRouteImport } from './routes/_site/produto.$slug'
 
@@ -65,6 +66,11 @@ const MediaSplatRoute = MediaSplatRouteImport.update({
   path: '/media/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SeoImagemRoute = SeoImagemRouteImport.update({
+  id: '/seo/imagem',
+  path: '/seo/imagem',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteCategoriaSlugRoute = SiteCategoriaSlugRouteImport.update({
   id: '/categoria/$slug',
   path: '/categoria/$slug',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof SitePrivacidadeRoute
   '/termos': typeof SiteTermosRoute
   '/media/$': typeof MediaSplatRoute
+  '/seo/imagem': typeof SeoImagemRoute
   '/categoria/$slug': typeof SiteCategoriaSlugRoute
   '/produto/$slug': typeof SiteProdutoSlugRoute
 }
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/privacidade': typeof SitePrivacidadeRoute
   '/termos': typeof SiteTermosRoute
   '/media/$': typeof MediaSplatRoute
+  '/seo/imagem': typeof SeoImagemRoute
   '/': typeof SiteIndexRoute
   '/categoria/$slug': typeof SiteCategoriaSlugRoute
   '/produto/$slug': typeof SiteProdutoSlugRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/_site/privacidade': typeof SitePrivacidadeRoute
   '/_site/termos': typeof SiteTermosRoute
   '/media/$': typeof MediaSplatRoute
+  '/seo/imagem': typeof SeoImagemRoute
   '/_site/': typeof SiteIndexRoute
   '/_site/categoria/$slug': typeof SiteCategoriaSlugRoute
   '/_site/produto/$slug': typeof SiteProdutoSlugRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/termos'
     | '/media/$'
+    | '/seo/imagem'
     | '/categoria/$slug'
     | '/produto/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/termos'
     | '/media/$'
+    | '/seo/imagem'
     | '/'
     | '/categoria/$slug'
     | '/produto/$slug'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/_site/privacidade'
     | '/_site/termos'
     | '/media/$'
+    | '/seo/imagem'
     | '/_site/'
     | '/_site/categoria/$slug'
     | '/_site/produto/$slug'
@@ -159,6 +171,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   MediaSplatRoute: typeof MediaSplatRoute
+  SeoImagemRoute: typeof SeoImagemRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MediaSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seo/imagem': {
+      id: '/seo/imagem'
+      path: '/seo/imagem'
+      fullPath: '/seo/imagem'
+      preLoaderRoute: typeof SeoImagemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_site/categoria/$slug': {
       id: '/_site/categoria/$slug'
       path: '/categoria/$slug'
@@ -270,6 +290,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   MediaSplatRoute: MediaSplatRoute,
+  SeoImagemRoute: SeoImagemRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

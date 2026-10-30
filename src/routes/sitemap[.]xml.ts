@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { publicClient } from "@/lib/public.server";
+import { SITE_ORIGIN } from "@/lib/seo";
 import { buildSitemap, fetchAllPages, validIsoDate } from "@/lib/sitemap";
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
+      GET: async () => {
         try {
-          const origin = new URL(request.url).origin;
+          const origin = SITE_ORIGIN;
           const sb = publicClient();
           const now = new Date();
           const nowIso = now.toISOString();

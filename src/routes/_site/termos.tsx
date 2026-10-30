@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { siteUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/_site/termos")({
   head: () => ({
@@ -8,8 +9,10 @@ export const Route = createFileRoute("/_site/termos")({
       { property: "og:title", content: "Termos de uso — Achadinhos do Cal" },
       { property: "og:description", content: "Termos de uso do site de curadoria de ofertas Achadinhos do Cal." },
       { property: "og:type", content: "article" },
+      { property: "og:url", content: siteUrl("/termos") },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: siteUrl("/termos") }],
   }),
   component: () => (
     <article className="mx-auto max-w-3xl space-y-4 px-4 py-10 text-sm leading-relaxed [&_h2]:mt-6 [&_h2]:text-lg [&_h2]:font-bold">

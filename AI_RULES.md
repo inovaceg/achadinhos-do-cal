@@ -19,3 +19,4 @@
 - Validate untrusted input at server/API boundaries with Zod and follow existing error-handling and data-access patterns. Do not treat client-side checks as authorization.
 - Use React Hook Form with Zod for forms that need structured validation. For simpler controls, prefer native React state and existing UI components.
 - Add or update focused Vitest/Testing Library tests for behavior changes; avoid generated route-tree edits and unrelated configuration changes.
+- SEO canonical production origin is `https://achadinhos-do-cal.vercel.app`; use `src/lib/seo.ts` for SEO URLs. Auth redirects remain current app origin.
