@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import { categoryInput, productInput } from "@/lib/admin.schemas";
 import { mapCategory, mapProduct, PRODUCT_SELECT } from "@/lib/queries";
+import { productStatisticsSchema, statisticsRangeSchema } from "@/lib/statistics";
 
 const uuid = z.string().uuid();
 type AdminClient = SupabaseClient<Database>;
@@ -13,6 +14,14 @@ async function assertAdmin(client: AdminClient) {
   const { data, error } = await client.rpc("is_admin");
   if (error || data !== true) throw new Error("Acesso negado: esta conta não tem permissão de administrador.");
 }
+
+export const getAdminStatistics = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).inputValidator((d: unknown) => statisticsRangeSchema.parse(d)).handler(async ({ data, context }) => {
+  await assertAdmin(context.supabase);
+  const { data: result, error } = await context.supabase.rpc("admin_product_statistics", { p_start: data.start, p_end: data.end });
+  if (error) throw error;
+  return productStatisticsSchema.parse(result);
+});
+
 function makeSlug(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 110) || "item";
 }

@@ -8,6 +8,7 @@ import { AdminEditor } from "@/components/admin/AdminEditor";
 import { SiteContentAdmin } from "@/components/admin/SiteContentAdmin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminStatistics } from "@/components/admin/AdminStatistics";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
@@ -18,6 +19,7 @@ function AdminPage() {
   const [loginPending, setLoginPending] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const previousUserId = useRef<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"products" | "content" | "statistics">("products");
 
   useEffect(() => {
     let alive = true;
@@ -134,7 +136,7 @@ function AdminPage() {
           <p>{dataQuery.error.message.includes("Acesso negado") ? "Esta conta não possui permissão de administrador. Solicite acesso ao responsável pelo projeto." : "Não foi possível carregar os dados administrativos. Tente novamente."}</p>
           <Button className="mt-3" variant="outline" onClick={() => dataQuery.refetch()}>Tentar novamente</Button>
         </section>
-      ) : <><AdminEditor key={session.user.id} data={dataQuery.data} userId={session.user.id} /><SiteContentAdmin key={session.user.id} userId={session.user.id} categories={dataQuery.data.categories} products={dataQuery.data.products} /></>}
+      ) : <><nav className="flex flex-wrap gap-2" aria-label="Seções administrativas">{([["products", "Produtos / Categorias"], ["content", "Conteúdo do site"], ["statistics", "Estatísticas"]] as const).map(([id, label]) => <Button key={id} aria-pressed={activeTab === id} variant={activeTab === id ? "default" : "outline"} onClick={() => setActiveTab(id)}>{label}</Button>)}</nav><div hidden={activeTab !== "products"}><AdminEditor key={session.user.id} data={dataQuery.data} userId={session.user.id} /></div><div hidden={activeTab !== "content"}><SiteContentAdmin key={session.user.id} userId={session.user.id} categories={dataQuery.data.categories} products={dataQuery.data.products} /></div><div hidden={activeTab !== "statistics"}><AdminStatistics key={session.user.id} userId={session.user.id} active={activeTab === "statistics"} /></div></>}
     </main>
   );
 }
