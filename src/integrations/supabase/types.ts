@@ -532,6 +532,14 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      product_popularity: {
+        Args: never
+        Returns: {
+          clicks: number
+          product_id: string
+          views: number
+        }[]
+      }
       register_click: {
         Args: { _banner_id: string; _product_id: string; _visitor: string }
         Returns: undefined
