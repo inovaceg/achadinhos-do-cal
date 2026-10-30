@@ -1,101 +1,50 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { BarChart3, Image as ImageIcon, MousePointerClick, Percent, RefreshCw, Eye, Package } from "lucide-react";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getAdminStatistics } from "@/lib/admin.functions";
-import { customDayRange, localDayRange, statisticsCsv, type ProductStatistics } from "@/lib/statistics";
+import { ctr, customDayRange, filterStatistics, localDayRange, lowPerformers, sortStatistics, statisticsCsv, timeline } from "@/lib/statistics";
 
-type StatisticsRange = "all" | "today" | "7days" | "30days" | "custom";
+type Range = "all" | "today" | "7days" | "30days" | "custom";
+type Sort = "views" | "clicks" | "ctr";
+const fmt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
+function ProductPic({ src }: { src: string | null }) { return <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">{src ? <img src={src} alt="" loading="lazy" decoding="async" className="size-full object-contain" /> : <ImageIcon className="size-4 text-muted-foreground" />}</span>; }
+function rate(clicks: number, views: number) { const value = ctr(clicks, views); return value === null ? "—" : `${value.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`; }
 
 export function AdminStatistics({ userId, active }: { userId: string; active: boolean }) {
-  const [range, setRange] = useState<StatisticsRange>("all");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"clicks" | "views">("clicks");
+  const [range, setRange] = useState<Range>("all"), [from, setFrom] = useState(""), [to, setTo] = useState(""), [search, setSearch] = useState("");
+  const [category, setCategory] = useState(""), [store, setStore] = useState(""), [product, setProduct] = useState(""), [sort, setSort] = useState<Sort>("views"), [ascending, setAscending] = useState(false);
   const [asOf, setAsOf] = useState(() => new Date());
-  const bounds = useMemo(() => {
-    if (range === "all") return { start: null, end: null };
-    if (range === "today") return localDayRange(asOf);
-    if (range === "7days") return localDayRange(asOf, 7);
-    if (range === "30days") return localDayRange(asOf, 30);
-    return customDayRange(from, to);
-  }, [range, from, to, asOf]);
-  const query = useQuery({
-    queryKey: ["admin", userId, "statistics", bounds],
-    queryFn: () => getAdminStatistics({ data: bounds! }),
-    enabled: active && !!bounds,
-    staleTime: 30_000,
-  });
-  const rows = query.data ?? [];
-  const filtered = rows
-    .filter((row) => `${row.name} ${row.store}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()))
-    .sort((a, b) => b[sort] - a[sort]);
-  const top = (key: "clicks" | "views", count: number) =>
-    [...rows].filter((row) => row[key] > 0).sort((a, b) => b[key] - a[key]).slice(0, count);
-  const period = bounds
-    ? bounds.start
-      ? `${new Date(bounds.start).toLocaleDateString("pt-BR")} — ${new Date(Date.parse(bounds.end!) - 1).toLocaleDateString("pt-BR")}`
-      : "Todos os períodos"
-    : "Selecione datas válidas";
-
-  const refresh = () => {
-    if (!active || !bounds) return;
-    const nextAsOf = new Date();
-    setAsOf(nextAsOf);
-    if (range === "all" || range === "custom") {
-      void query.refetch();
-      return;
-    }
-    const nextBounds = localDayRange(nextAsOf, range === "today" ? 1 : range === "7days" ? 7 : 30);
-    if (nextBounds.start === bounds?.start && nextBounds.end === bounds?.end) void query.refetch();
-  };
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([statisticsCsv(filtered, period)], { type: "text/csv;charset=utf-8" }));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `estatisticas-${new Date().toISOString().slice(0, 10)}.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-  };
-
-  return (
-    <section className="min-w-0 space-y-5 rounded-2xl border bg-card p-4 sm:p-6">
-      <h2 className="text-2xl font-bold">Estatísticas</h2>
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="text-sm">Período
-          <select className="mt-1 block h-10 rounded-md border bg-background px-3" value={range} onChange={(event) => setRange(event.target.value as StatisticsRange)}>
-            <option value="all">Todos</option><option value="today">Hoje</option><option value="7days">7 dias</option><option value="30days">30 dias</option><option value="custom">Personalizado</option>
-          </select>
-        </label>
-        {range === "custom" && <>
-          <label className="text-sm">De<Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
-          <label className="text-sm">Até<Input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label>
-        </>}
-        <Button variant="outline" disabled={!bounds || query.isFetching} onClick={refresh}>Atualizar</Button>
-        <Button disabled={!active || !bounds || !query.data || query.isFetching || query.isError} onClick={download}>Exportar CSV</Button>
-      </div>
-      {!bounds && <p role="alert" className="text-sm text-destructive">Informe datas válidas para o período personalizado.</p>}
-      {active && bounds && query.isPending && <p>Carregando estatísticas…</p>}
-      {query.isError && <div role="alert">Não foi possível carregar o relatório. <Button variant="outline" onClick={refresh}>Tentar novamente</Button></div>}
-      {query.data && <>
-        <p className="text-sm text-muted-foreground">Período: {period}. As datas são exibidas no horário local; o último dia selecionado é inclusivo. Visualizações são aberturas de detalhes; cliques são acionamentos dos botões de oferta — não representam compras, pessoas únicas ou conversões.</p>
-        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-          {([["views", "Mais visualizações", "Nenhuma visualização no período."], ["clicks", "Mais cliques", "Nenhum clique no período."]] as const).map(([key, title, empty]) => {
-            const leaders = top(key, 5);
-            return <article key={key} className="min-w-0 rounded-xl border p-4"><h3 className="font-semibold">{title}</h3>{leaders.map((row) => <p key={row.product_id} className="flex min-w-0 justify-between gap-2"><span className="min-w-0 break-words">{row.name}</span><span className="shrink-0 text-muted-foreground">{row[key]}</span></p>)}{!leaders.length && <p className="text-sm text-muted-foreground">{empty}</p>}</article>;
-          })}
-        </div>
-        <p className="font-semibold">Totais do período: {rows.reduce((total, row) => total + row.views, 0)} visualizações · {rows.reduce((total, row) => total + row.clicks, 0)} cliques</p>
-        <div className="flex flex-wrap gap-3">
-          <Input className="max-w-sm" aria-label="Buscar produto ou loja" placeholder="Buscar produto ou loja" value={search} onChange={(event) => setSearch(event.target.value)} />
-          <label className="flex items-center gap-2 text-sm">Ordenar por
-            <select className="h-10 rounded-md border bg-background px-2" value={sort} onChange={(event) => setSort(event.target.value as "clicks" | "views")}><option value="clicks">Cliques</option><option value="views">Visualizações</option></select>
-          </label>
-        </div>
-        <div className="w-full overflow-x-auto"><table className="w-full min-w-[600px] text-left text-sm"><thead><tr><th className="p-2">Produto</th><th>Loja</th><th>Status</th><th>Visualizações</th><th>Cliques</th></tr></thead><tbody>{filtered.map((row: ProductStatistics) => <tr key={row.product_id} className="border-t"><td className="p-2">{row.name}</td><td>{row.store}</td><td>{row.active ? "Ativo" : "Inativo"}</td><td>{row.views}</td><td>{row.clicks}</td></tr>)}</tbody></table>{!filtered.length && <p className="p-4 text-sm text-muted-foreground">{rows.length ? "Nenhum produto corresponde à busca." : "Nenhum produto encontrado no relatório."}</p>}</div>
-        <p className="text-xs text-muted-foreground">Produtos excluídos e seus eventos em cascata não aparecem neste relatório.</p>
-      </>}
-    </section>
-  );
+  const bounds = useMemo(() => range === "all" ? { start: null, end: null } : range === "today" ? localDayRange(asOf) : range === "7days" ? localDayRange(asOf, 7) : range === "30days" ? localDayRange(asOf, 30) : customDayRange(from, to), [range, from, to, asOf]);
+  const query = useQuery({ queryKey: ["admin", userId, "statistics", bounds], queryFn: () => getAdminStatistics({ data: bounds! }), enabled: active && !!bounds, staleTime: 30_000 });
+  const rows = query.data?.rows ?? [];
+  const filtered = useMemo(() => filterStatistics(rows, { search, category, store, product }), [rows, search, category, store, product]);
+  const ordered = useMemo(() => sortStatistics(filtered, sort, ascending), [filtered, sort, ascending]);
+  const totals = filtered.reduce((sum, row) => ({ views: sum.views + row.views, clicks: sum.clicks + row.clicks }), { views: 0, clicks: 0 });
+  const activeProducts = filtered.filter((row) => row.active).length;
+  const chart = useMemo(() => query.data && bounds ? timeline(query.data.series, filtered, bounds, query.data.snapshot) : { points: [], unit: "diário UTC" as const }, [query.data, filtered, bounds]);
+  const period = bounds ? bounds.start ? `${new Date(bounds.start).toLocaleDateString("pt-BR")} — ${new Date(Date.parse(bounds.end!) - 1).toLocaleDateString("pt-BR")}` : "Todos os períodos" : "Datas inválidas";
+  const refresh = () => { if (!bounds || !active) return; const nextAsOf = new Date(); const nextBounds = range === "today" ? localDayRange(nextAsOf) : range === "7days" ? localDayRange(nextAsOf, 7) : range === "30days" ? localDayRange(nextAsOf, 30) : bounds; if (JSON.stringify(nextBounds) === JSON.stringify(bounds)) void query.refetch(); setAsOf(nextAsOf); };
+  const categoryLabel = !category ? "Todas as categorias" : category === "none" ? "Sem categoria" : query.data?.categories.find((item) => item.id === category)?.name ?? "Categoria selecionada";
+  const storeLabel = !store ? "Todas as lojas" : store === "none" ? "Sem loja" : query.data?.stores.find((item) => item.id === store)?.name ?? "Loja selecionada";
+  const productLabel = !product ? "Todos os produtos" : rows.find((item) => item.product_id === product)?.name ?? "Produto selecionado";
+  const download = () => { const url = URL.createObjectURL(new Blob([statisticsCsv(ordered, `${period}; seleção aplicada: ${categoryLabel}, ${storeLabel}, ${productLabel}, busca “${search || "—"}`)], { type: "text/csv;charset=utf-8" })); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `estatisticas-${new Date().toISOString().slice(0, 10)}.csv`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); };
+  const top = (key: "views" | "clicks") => [...filtered].filter((row) => row[key] > 0).sort((a, b) => b[key] - a[key] || a.name.localeCompare(b.name)).slice(0, 5);
+  const cards = [["Visualizações", totals.views, Eye], ["Cliques", totals.clicks, MousePointerClick], ["CTR total", rate(totals.clicks, totals.views), Percent], ["Produtos ativos (atual)", activeProducts, Package]] as const;
+  return <section className="min-w-0 space-y-6 rounded-2xl border bg-card p-4 text-foreground sm:p-6">
+    <header className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-2xl font-bold">Estatísticas</h2><p className="text-sm text-muted-foreground">Período: {period} · Totais e rankings consideram os filtros abaixo.</p></div><Button variant="outline" disabled={!bounds || query.isFetching} onClick={refresh}><RefreshCw className="mr-2 size-4"/>Atualizar</Button></header>
+    <div className="flex flex-wrap items-end gap-3"><label className="min-w-0 max-w-full text-sm">Período<select className="mt-1 block h-11 max-w-full rounded-md border bg-background px-3" value={range} onChange={(e) => setRange(e.target.value as Range)}><option value="all">Todos</option><option value="today">Hoje</option><option value="7days">7 dias</option><option value="30days">30 dias</option><option value="custom">Personalizado</option></select></label>{range === "custom" && <><label className="min-w-0 max-w-full text-sm">De<Input type="date" value={from} onChange={(e) => setFrom(e.target.value)}/></label><label className="min-w-0 max-w-full text-sm">Até<Input type="date" value={to} onChange={(e) => setTo(e.target.value)}/></label></>}<Input className="max-w-xs" aria-label="Buscar produto ou loja" placeholder="Buscar produto ou loja" value={search} onChange={(e) => setSearch(e.target.value)}/><label className="min-w-0 max-w-full text-sm">Categoria<select className="mt-1 block h-11 max-w-full rounded-md border bg-background px-2" value={category} onChange={(e) => setCategory(e.target.value)}><option value="">Todas</option><option value="none">Sem categoria</option>{query.data?.categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label className="min-w-0 max-w-full text-sm">Loja<select className="mt-1 block h-11 max-w-full rounded-md border bg-background px-2" value={store} onChange={(e) => setStore(e.target.value)}><option value="">Todas</option><option value="none">Sem loja</option>{query.data?.stores.map((item) => <option key={item.id} value={item.id}>{item.name ?? "Sem nome"}</option>)}</select></label><label className="min-w-0 max-w-full text-sm">Produto<select className="mt-1 block max-w-56 truncate h-11 rounded-md border bg-background px-2" value={product} onChange={(e) => setProduct(e.target.value)}><option value="">Todos</option>{rows.map((item) => <option key={item.product_id} value={item.product_id}>{item.name}</option>)}</select></label><Button disabled={!active || !bounds || !query.data || query.isFetching || query.isError} onClick={download}>Exportar CSV</Button></div>
+    {!bounds && <p role="alert" className="text-sm text-destructive">Informe datas válidas para o período personalizado.</p>}{active && bounds && query.isPending && <p>Carregando estatísticas…</p>}{query.isError && <div role="alert">Não foi possível carregar o relatório. <Button variant="outline" onClick={refresh}>Tentar novamente</Button></div>}
+    {active && bounds && query.data && !query.isFetching && !query.isError && <>
+      <p className="text-xs text-muted-foreground">Eventos de visualização/clique não são vendas, conversões nem pessoas únicas; cliques podem ocorrer na grade sem abrir detalhes e repetir, então CTR pode superar 100%. O CTR total é (cliques totais ÷ visualizações totais) × 100; sem visualizações aparece —. Produtos ativos reflete o cadastro atual.</p>
+      <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map(([label, value, Icon]) => <article key={label} className="rounded-xl border bg-background p-4"><div className="flex items-center justify-between text-sm text-muted-foreground"><span>{label}</span><Icon className="size-4 text-orange-600"/></div><p className="mt-2 text-2xl font-semibold">{typeof value === "number" ? fmt(value) : value}</p></article>)}</div>
+      <div className="grid min-w-0 gap-4 lg:grid-cols-2">{([ ["views", "Mais visualizações"], ["clicks", "Mais cliques"] ] as const).map(([key, title]) => <article className="min-w-0 rounded-xl border p-4" key={key}><h3 className="mb-3 font-semibold">{title} · Top 5</h3>{top(key).map((row, index) => <div key={row.product_id} className="flex min-w-0 items-center gap-3 border-t py-2"><span className="w-5 text-sm text-muted-foreground">{index + 1}</span><ProductPic src={row.image_url}/><span className="min-w-0 flex-1 break-words text-sm">{row.name}<span className="block text-xs text-muted-foreground">{fmt(row.views)} visualizações · {fmt(row.clicks)} cliques · CTR {rate(row.clicks, row.views)}</span></span></div>)}{!top(key).length && <p className="text-sm text-muted-foreground">Sem eventos no período com esta seleção.</p>}</article>)}</div>
+      <article className="rounded-xl border p-4"><div className="mb-3 flex items-center gap-2 font-semibold"><BarChart3 className="size-4 text-orange-600"/>Visualizações e cliques</div>{chart.points.length ? <div className="h-[280px] w-full"><ResponsiveContainer width="100%" height="100%"><LineChart data={chart.points}><CartesianGrid strokeDasharray="3 3"/><XAxis dataKey="date" tickFormatter={(value) => new Date(`${value}T00:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC", day: "2-digit", month: "2-digit" })}/><YAxis allowDecimals={false}/><Legend/><Tooltip labelFormatter={(value) => `${value} (UTC)`}/><Line type="monotone" dataKey="views" name="Visualizações" stroke="#ea580c" strokeWidth={2} dot={chart.points.length === 1} isAnimationActive={false}/><Line type="monotone" dataKey="clicks" name="Cliques" stroke="#111827" strokeWidth={2} dot={chart.points.length === 1} isAnimationActive={false}/></LineChart></ResponsiveContainer></div> : <p className="py-8 text-center text-sm text-muted-foreground">Sem eventos datados para exibir.</p>}<p className="mt-2 text-xs text-muted-foreground">Agrupamento {chart.unit}; limites locais são convertidos para dias UTC parciais. Eventos sem data podem compor os totais RPC, mas não o gráfico.</p></article>
+      <article className="rounded-xl border p-4"><h3 className="mb-1 font-semibold">Baixo desempenho</h3><p className="mb-3 text-xs text-muted-foreground">Produtos com visualizações &gt; 0 e nenhum clique.</p>{lowPerformers(filtered).length ? <div className="grid gap-2 sm:grid-cols-2">{lowPerformers(filtered).map((row) => <div key={row.product_id} className="flex items-center gap-3 rounded-lg bg-muted/40 p-2"><ProductPic src={row.image_url}/><span className="min-w-0 flex-1 break-words text-sm">{row.name}</span><span className="min-w-0 max-w-full text-sm">{fmt(row.views)} visualizações</span></div>)}</div> : <p className="text-sm text-muted-foreground">Nenhum produto corresponde a esse critério.</p>}</article>
+      <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">Produtos · {filtered.length} selecionados</h3><label className="flex items-center gap-2 text-sm">Ordenar por<select className="h-10 rounded-md border bg-background px-2" value={sort} onChange={(e) => setSort(e.target.value as Sort)}><option value="views">Visualizações</option><option value="clicks">Cliques</option><option value="ctr">CTR</option></select><button type="button" aria-label="Alternar ordem" className="rounded border px-3 py-2" onClick={() => setAscending(!ascending)}>{ascending ? "↑" : "↓"}</button></label></div>
+      <div className="w-full overflow-x-auto rounded-xl border"><table className="w-full min-w-[760px] text-sm"><thead className="bg-muted/50"><tr><th className="p-3 text-left">Produto</th><th className="p-3 text-left">Loja / categoria</th><th className="p-3 text-left">Status</th><th className="p-3 text-right">Visualizações</th><th className="p-3 text-right">Cliques</th><th className="p-3 text-right">CTR</th></tr></thead><tbody>{ordered.map((row) => <tr key={row.product_id} className="border-t"><td className="p-3"><div className="flex items-center gap-3"><ProductPic src={row.image_url}/><span className="min-w-0 truncate">{row.name}</span></div></td><td className="p-3">{row.store || "Sem loja"}<span className="block text-xs text-muted-foreground">{row.category_name ?? "Sem categoria"}</span></td><td className="p-3">{row.active ? "Ativo" : "Inativo"}</td><td className="p-3 text-right tabular-nums">{fmt(row.views)}</td><td className="p-3 text-right tabular-nums">{fmt(row.clicks)}</td><td className="p-3 text-right tabular-nums">{rate(row.clicks, row.views)}</td></tr>)}</tbody></table>{!ordered.length && <p className="p-4 text-sm text-muted-foreground">{rows.length ? "Nenhum produto corresponde à seleção." : "Nenhum produto encontrado no relatório."}</p>}</div><p className="text-xs text-muted-foreground">Produtos excluídos e eventos em cascata não aparecem.</p>
+    </>}
+  </section>;
 }

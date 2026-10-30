@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import { categoryInput, productInput } from "@/lib/admin.schemas";
 import { mapCategory, mapProduct, PRODUCT_SELECT } from "@/lib/queries";
-import { productStatisticsSchema, statisticsRangeSchema } from "@/lib/statistics";
+import { productStatisticsSchema, statisticsRangeSchema, statisticsResponseSchema, statisticsSeriesSchema } from "@/lib/statistics";
 
 const uuid = z.string().uuid();
 type AdminClient = SupabaseClient<Database>;
@@ -17,9 +17,55 @@ async function assertAdmin(client: AdminClient) {
 
 export const getAdminStatistics = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).inputValidator((d: unknown) => statisticsRangeSchema.parse(d)).handler(async ({ data, context }) => {
   await assertAdmin(context.supabase);
-  const { data: result, error } = await context.supabase.rpc("admin_product_statistics", { p_start: data.start, p_end: data.end });
-  if (error) throw error;
-  return productStatisticsSchema.parse(result);
+  const [rpc, productMetadataRows, categories, stores] = await Promise.all([
+    context.supabase.rpc("admin_product_statistics", { p_start: data.start, p_end: data.end }),
+    (async () => {
+      const items: { id: string; category_id: string | null; store_id: string | null }[] = [];
+      for (let offset = 0; ; offset += 500) {
+        const result = await context.supabase.from("products").select("id,category_id,store_id").order("id").range(offset, offset + 499);
+        if (result.error) throw result.error;
+        items.push(...result.data);
+        if (result.data.length < 500) break;
+      }
+      return items;
+    })(),
+    (async () => { const items: { id: string; name: string }[] = []; for (let offset = 0; ; offset += 500) { const page = await context.supabase.from("categories").select("id,name").order("id").range(offset, offset + 499); if (page.error) throw page.error; items.push(...page.data); if (page.data.length < 500) break; } return { data: items, error: null }; })(),
+    (async () => { const items: { id: string; name: string | null }[] = []; for (let offset = 0; ; offset += 500) { const page = await context.supabase.from("stores").select("id,name").order("id").range(offset, offset + 499); if (page.error) throw page.error; items.push(...page.data); if (page.data.length < 500) break; } return { data: items, error: null }; })(),
+  ]);
+  if (rpc.error) throw rpc.error;
+  if (categories.error) throw categories.error;
+  if (stores.error) throw stores.error;
+  const rows = productStatisticsSchema.parse(rpc.data);
+  const metadata = new Map(categories.data.map((item) => [item.id, item.name]));
+  const storeMetadata = new Map(stores.data.map((item) => [item.id, item.name ?? ""]));
+  const productMetadata = new Map(productMetadataRows.map((item) => [item.id, item]));
+  const snapshot = new Date().toISOString();
+  const undatedResult = !data.start && !data.end ? await context.supabase.from("events").select("id", { count: "exact", head: true }).in("kind", ["view", "click"]).not("product_id", "is", null).is("created_at", null) : { count: 0, error: null };
+  if (undatedResult.error) throw undatedResult.error;
+  const events = new Map<string, { date: string; product_id: string; views: number; clicks: number }>();
+  let lastId: string | null = null;
+  for (;;) {
+    let request = context.supabase.from("events").select("id,product_id,kind,created_at").in("kind", ["view", "click"]).not("product_id", "is", null).lte("created_at", snapshot).order("id", { ascending: true }).limit(500);
+    if (lastId) request = request.gt("id", lastId);
+    if (data.start) request = request.gte("created_at", data.start);
+    if (data.end) request = request.lt("created_at", data.end);
+    const page = await request;
+    if (page.error) throw page.error;
+    if (!page.data.length) break;
+    lastId = page.data[page.data.length - 1]!.id;
+    for (const event of page.data) {
+      if (!event.created_at || !event.product_id) continue;
+      const date = event.created_at.slice(0, 10);
+      const key = `${date}:${event.product_id}`;
+      const item = events.get(key) ?? { date, product_id: event.product_id, views: 0, clicks: 0 };
+      if (event.kind === "view") item.views++;
+      else item.clicks++;
+      events.set(key, item);
+    }
+    if (page.data.length < 500) break;
+  }
+  const response = { rows: rows.map((row) => { const item = productMetadata.get(row.product_id); return { ...row, category_id: item?.category_id ?? null, category_name: item?.category_id ? metadata.get(item.category_id) ?? null : null, store_id: item?.store_id ?? null, store_name: item?.store_id ? storeMetadata.get(item.store_id) ?? null : null }; }), categories: categories.data, stores: stores.data, series: statisticsSeriesSchema.parse([...events.values()]), snapshot, undatedCount: undatedResult.count ?? 0 };
+  return statisticsResponseSchema.parse(response);
 });
 
 function makeSlug(value: string) {

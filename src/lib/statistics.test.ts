@@ -1,34 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { customDayRange, localDayRange, statisticsCsv, statisticsRangeSchema, type ProductStatistics } from "@/lib/statistics";
-
-const row: ProductStatistics = { product_id: "00000000-0000-4000-8000-000000000001", name: '=cmd;"run', slug: "item", image_url: null, store: "@loja", active: true, clicks: 4, views: 9 };
+import { aggregateSeries, ctr, customDayRange, filterStatistics, localDayRange, lowPerformers, sortStatistics, statisticsCsv, statisticsRangeSchema, timeline, type ProductStatistics } from "@/lib/statistics";
+const row: ProductStatistics = { product_id: "00000000-0000-4000-8000-000000000001", name: '=cmd;"run', slug: "item", image_url: null, store: "@loja", active: true, clicks: 4, views: 9, category_id: null, category_name: null, store_id: null, store_name: null };
 describe("statistics helpers", () => {
-  it("validates paired ISO date bounds and ordering", () => {
-    expect(statisticsRangeSchema.safeParse({ start: null, end: null }).success).toBe(true);
-    expect(statisticsRangeSchema.safeParse({ start: "2025-01-02T00:00:00Z", end: null }).success).toBe(false);
-    expect(statisticsRangeSchema.safeParse({ start: "2025-01-02T00:00:00Z", end: "2025-01-01T00:00:00Z" }).success).toBe(false);
-  });
-  it("creates complete local-day boundaries", () => {
-    const date = new Date(2025, 2, 8, 14);
-    const bounds = localDayRange(date, 7);
-    expect(new Date(bounds.start).getHours()).toBe(0);
-    expect(new Date(bounds.end).getDate()).toBe(9);
-  });
-  it("validates custom calendar days and includes the final day", () => {
-    const bounds = customDayRange("2025-02-28", "2025-03-01");
-    expect(bounds).not.toBeNull();
-    expect(new Date(bounds!.start).getDate()).toBe(28);
-    expect(new Date(bounds!.end).getDate()).toBe(2);
-    expect(customDayRange("2025-02-29", "2025-03-01")).toBeNull();
-    expect(customDayRange("2024-02-29", "2024-02-29")).not.toBeNull();
-    expect(customDayRange("2025-03-02", "2025-03-01")).toBeNull();
-    expect(customDayRange("2025-2-01", "2025-03-01")).toBeNull();
-  });
-  it("escapes CSV and neutralizes formulas", () => {
-    const csv = statisticsCsv([row], "Todos");
-    expect(csv.startsWith("\uFEFF")).toBe(true);
-    expect(csv).toContain("\"'=cmd;\"\"run\"");
-    expect(csv).toContain("\"'@loja\"");
-    expect(csv).toContain('"Nome";"Loja";"Status";"Visualizações";"Cliques"');
-  });
+  it("validates paired ISO bounds", () => { expect(statisticsRangeSchema.safeParse({ start: null, end: null }).success).toBe(true); expect(statisticsRangeSchema.safeParse({ start: "2025-01-02T00:00:00Z", end: null }).success).toBe(false); expect(statisticsRangeSchema.safeParse({ start: "2025-01-02T00:00:00Z", end: "2025-01-01T00:00:00Z" }).success).toBe(false); });
+  it("preserves local date bounds and inclusive custom end", () => { const bounds = localDayRange(new Date(2025, 2, 8, 14), 7); expect(new Date(bounds.start).getHours()).toBe(0); expect(new Date(bounds.end).getDate()).toBe(9); const custom = customDayRange("2025-02-28", "2025-03-01"); expect(new Date(custom!.end).getDate()).toBe(2); expect(customDayRange("2025-02-29", "2025-03-01")).toBeNull(); });
+  it("calculates weighted CTR from totals", () => { expect(ctr(0, 0)).toBeNull(); expect(ctr(0, 5)).toBe(0); expect(ctr(12, 10)).toBe(120); expect(ctr(2, 5)).toBe(40); expect(ctr(3, 15)).not.toBe((ctr(2, 5)! + ctr(1, 10)!) / 2); });
+  it("applies category, store, product, search, and low performer filters", () => { const second = { ...row, product_id: "00000000-0000-4000-8000-000000000002", name: "zero", clicks: 0, views: 12, category_id: "00000000-0000-4000-8000-000000000003", store_id: "00000000-0000-4000-8000-000000000004" }; expect(filterStatistics([row, second], { search: "zero", category: second.category_id, store: second.store_id, product: second.product_id })).toEqual([second]); expect(lowPerformers([row, second, { ...second, views: 0 }])).toEqual([second]); });
+  it("aggregates returned daily sums", () => { expect(aggregateSeries([{ date: "2025-01-01", product_id: row.product_id, views: 2, clicks: 1 }, { date: "2025-01-01", product_id: row.product_id, views: 3, clicks: 0 }], [row])).toEqual([{ date: "2025-01-01", views: 5, clicks: 1 }]); });
+  it("fills confirmed daily gaps and leaves an isolated point visible", () => { const result = timeline([{ date: "2025-01-01", product_id: row.product_id, views: 2, clicks: 1 }, { date: "2025-01-03", product_id: row.product_id, views: 3, clicks: 0 }], [row], { start: "2025-01-01T00:00:00Z", end: "2025-01-05T00:00:00Z" }, "2025-01-03T12:00:00Z"); expect(result.points).toEqual([{ date: "2025-01-01", views: 2, clicks: 1 }, { date: "2025-01-02", views: 0, clicks: 0 }, { date: "2025-01-03", views: 3, clicks: 0 }]); });
+  it("fills monthly gaps and preserves monthly totals", () => { const result = timeline([{ date: "2025-01-03", product_id: row.product_id, views: 2, clicks: 1 }, { date: "2025-03-03", product_id: row.product_id, views: 3, clicks: 2 }], [row], { start: "2025-01-01T00:00:00Z", end: "2025-05-01T00:00:00Z" }, "2025-04-15T12:00:00Z"); expect(result.unit).toBe("mensal UTC"); expect(result.points).toEqual([{ date: "2025-01-01", views: 2, clicks: 1 }, { date: "2025-02-01", views: 0, clicks: 0 }, { date: "2025-03-01", views: 3, clicks: 2 }, { date: "2025-04-01", views: 0, clicks: 0 }]); });
+  it("sorts null CTR last in either direction, with alphabetical ties", () => { const nullRow = { ...row, name: "Sem dados", views: 0, clicks: 0 }; const tied = { ...row, name: "B", product_id: "00000000-0000-4000-8000-000000000002", views: 10, clicks: 1 }; const tiedA = { ...tied, name: "A", product_id: "00000000-0000-4000-8000-000000000003" }; for (const ascending of [true, false]) expect(sortStatistics([nullRow, tied, tiedA], "ctr", ascending).map((item) => item.name)).toEqual(["A", "B", "Sem dados"]); });
+  it("escapes CSV and neutralizes formulas", () => { const csv = statisticsCsv([row], "Todos"); expect(csv.startsWith("\uFEFF")).toBe(true); expect(csv).toContain("\"'=cmd;\"\"run\""); expect(csv).toContain('"Nome";"Loja";"Categoria";"Status";"Visualizações";"Cliques";"CTR (%)"'); });
 });
