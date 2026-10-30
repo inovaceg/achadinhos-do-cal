@@ -23,11 +23,11 @@ export function mapProduct(row: RawProduct, popularity: Map<string, { clicks: nu
   return { ...row, description: row.description ?? "", features: row.features ?? [], images: row.images ?? [], videos: row.videos ?? [], tags: row.tags ?? [], created_at: row.created_at ?? "", price_updated_at: row.price_updated_at ?? "", active: row.active ?? false, featured: row.featured ?? false, bestseller: row.bestseller ?? false, recommended: row.recommended ?? false, image_url: row.image_url ?? "", promo_price: Number(row.price), affiliate_url: row.external_url ?? "", main_image: row.image_url, best_seller: row.bestseller ?? false, badge: null, store: row.stores?.name ?? "", click_count: popularity.get(row.id)?.clicks ?? 0, view_count: popularity.get(row.id)?.views ?? 0, categories: row.categories ? { name: row.categories.name ?? "", slug: row.categories.slug ?? "" } : null };
 }
 export const settingsQuery = queryOptions({ queryKey: ["settings"], queryFn: async () => {
-  const { data, error } = await supabase.from("site_settings").select("data").eq("id", 1).maybeSingle();
+  const { data, error } = await supabase.from("site_settings").select("*").eq("id", 1).maybeSingle();
   if (error) throw error;
-  if (!data?.data || typeof data.data !== "object" || Array.isArray(data.data)) return null;
+  if (!data) return null;
   const settings: Settings = {};
-  for (const key of ["site_name", "slogan", "logo_url", "footer_text", "instagram", "tiktok", "whatsapp", "contact_email", "affiliate_notice", "seo_title", "seo_description", "favicon_url", "primary_color", "share_image_url"] as const) { const value = data.data[key]; if (typeof value === "string") settings[key] = value; }
+  for (const key of ["site_name", "slogan", "logo_url", "footer_text", "instagram", "tiktok", "whatsapp", "contact_email", "affiliate_notice", "seo_title", "seo_description", "favicon_url", "primary_color", "share_image_url"] as const) { const value = data[key]; if (typeof value === "string") settings[key] = value; }
   return settings;
 }, staleTime: 60_000 });
 export const categoriesQuery = queryOptions({ queryKey: ["categories", "public"], queryFn: async () => {
